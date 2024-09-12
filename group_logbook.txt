@@ -1,1 +1,2 @@
 This is the group logbook. Write here what you have been working on. 
+12-9-2024, Amir -- I cleaned the data and gave it some structure by separating the dataset into dialog_act and utterances. So now it has two columns, one with the dialog acts and one with the user input to the system. I also made a train-test-split for both the original df and the cleaned one. (2 hours work)
