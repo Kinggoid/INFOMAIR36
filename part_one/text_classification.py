@@ -25,7 +25,5 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.15)
 
 #doing the same for the clean dataset
 X_clean = df_clean['utterance']
-y_clean = df['dialog_act']
+y_clean = df_clean['dialog_act']
 Xc_train, Xc_test, yc_train, yc_test = train_test_split(X_clean, y_clean, test_size = 0.15)
-
-
