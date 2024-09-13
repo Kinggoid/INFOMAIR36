@@ -3,10 +3,10 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 #read dataset
-file_path = 'D:\School\MAIR\dialog_acts.dat'
+# file_path = 'D:\School\MAIR\dialog_acts.dat'
+file_path = 'part_one\dialog_acts.dat'
 df = pd.read_csv(file_path, delimiter= '\t')
 df.columns = ['dialog_act']
-
 
 #cleaning dataset
 df_clean = df.drop_duplicates()
@@ -16,7 +16,6 @@ df['utterance'] = df['dialog_act'].str.split().str[1:]
 df['dialog_act'] = df['dialog_act'].str.split().str[0]
 df_clean['utterance'] = df_clean['dialog_act'].str.split().str[1:]
 df_clean['dialog_act'] = df_clean['dialog_act'].str.split().str[0]
-
 
 #splitting data into train and test data
 X = df['utterance']
