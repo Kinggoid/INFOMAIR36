@@ -1,31 +1,34 @@
-# model that assigns labels to data based on the majority class of the training data
 class MajorityClassModel:
-    # initialize model with training labels
+    # Initialize model with training labels
     def __init__(self, labels):
-        # set majority class as the label that has the highest occurence in the list
-        self.majorityClass = max(labels,key=labels.count)
+        # Save labels for evaluate_ours method
+        self.labels = labels
+        # Set majority class as the label that has the highest occurrence
+        self.majorityClass = max(labels, key=labels.count)
 
-    # assigns majority class label to input data
+    # Assigns majority class label to input data
     def test(self, input):
         return self.majorityClass
     
-    # evaluates model based on lists of test data and labels 
+    # Evaluates model based on lists of test data and labels
     def evaluate(self, data, labels):
+        # Ensure that data and labels are both lists
+        data = list(data)
+        labels = list(labels)
+
         if len(data) != len(labels):
-            raise Exception("data and label lists are not the same size")
-        
-        # calculate accuracy of model
+            raise Exception("Data and label lists are not the same size")
+
         correct = 0
-        for i in range(0, len(data)):
+        for i in range(len(data)):
             if self.test(data[i]) == labels[i]:
                 correct += 1
-    
-        # return accuracy
+        
         return correct / len(data)
         
     def evaluate_ours(self, data, labels):
         
-        training_accuracy = sum(self.labels == self.majorityClass) / len(self.labels)
+        training_accuracy = sum(labels == self.majorityClass) / len(labels)
 
         return training_accuracy
 
