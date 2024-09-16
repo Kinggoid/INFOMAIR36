@@ -54,8 +54,22 @@ class Classifier:
             utterance_set = set(utterance)
 
             # If a certain key is in utterance, classify as:...
-            if 'goodbye' in utterance_set:
+            if 'goodbye' in utterance_set or 'bye' in utterance_set:
                 label = pd.Series('bye')
+            elif 'thank' in utterance_set:
+                label = pd.Series('thankyou')
+            elif 'hi ' in utterance_set or "hello" in utterance_set or "helo " in utterance_set:
+                label = pd.Series('hello')
+            elif 'what ' in utterance_set or 'phone ' in utterance_set or 'address ' in utterance_set:
+                label = pd.Series('request')
+            elif 'yes' in utterance_set:
+                label = pd.Series('affirm')
+            elif 'no' in utterance_set:
+                label = pd.Series('negate')
+            elif 'area ' in utterance_set or 'looking ' in utterance_set:
+                label = pd.Series('inform')
+            elif 'else ' in utterance_set:
+                label = pd.Series('reqalts')
             else:
                 label = pd.Series('inform')
             
