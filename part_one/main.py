@@ -25,14 +25,21 @@ label_clean = df_clean['dialog_act'].tolist()
 
 # Splitting data into training and test data
 utterance_clean_train, utterance_clean_test, label_clean_train, label_clean_test = train_test_split(
-    utterance_clean, label_clean, test_size=0.15
+    utterance_clean, label_clean, test_size=0.15, random_state=42
 )
 
 # BASELINE MODELS ======================================================================
 
-# Initialize and evaluate the model
+# Initialize and evaluate Majority class
 mc_model = MajorityClassModel(label_clean_train)
 
-# Test the model's performance
+# testing performance
 mc_acc = mc_model.evaluate(utterance_clean_test, label_clean_test)
 print("Majority class model accuracy is", mc_acc)
+
+# initialize and evaluate keyword matching
+km_model = KeywordMatchingModel(utterance_clean_train, label_clean_train)
+
+#testing performance
+km_acc = km_model.evaluate(utterance_clean_test, label_clean_test)
+print("Keyword matching model accuracy is ", km_acc)
