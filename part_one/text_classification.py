@@ -1,6 +1,9 @@
 #import libraries
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from Logistic_Regression import run_logistic_regression
+from Decision_tree import DTC
+
 
 
 #read dataset
@@ -32,8 +35,18 @@ X_clean = df_clean['utterance']
 y_clean = df_clean['dialog_act']
 Xc_train, Xc_test, yc_train, yc_test = train_test_split(X_clean, y_clean, test_size = 0.15)
 
+# LOGISTIC REGRESSION --------------------------------------------------------------
+print('Logistic Regression df:')
+run_logistic_regression(df)
+print('Logistic Regression df_clean:')
+run_logistic_regression(df_clean)
 
-DTC(dataframe)
+# Decision Tree Classifier
+print('Decision Tree Classifier df:')
+DTC(df)
+print('Decision Tree Classifier df_clean:')
+DTC(df_clean)
+
 
 
 class MajorityClassModel:

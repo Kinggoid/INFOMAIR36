@@ -32,8 +32,8 @@ def DTC(dataframe):
     vectorizer = CountVectorizer(ngram_range = (1,2), stop_words = 'english')
 
     #vectorizing the X set
-    X = vectorizer.fit_transform(df['utterance'])
-    y = df['dialog_act']
+    X = vectorizer.fit_transform(dataframe['utterance'])
+    y = dataframe['dialog_act']
 
     #split data into train and test splits
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
@@ -49,5 +49,4 @@ def DTC(dataframe):
     print("Accuracy:", accuracy_score(y_test, y_pred))
     print(classification_report(y_test, y_pred))
 
-    
-DTC(df)
+

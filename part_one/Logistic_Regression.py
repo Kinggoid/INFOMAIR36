@@ -10,7 +10,6 @@ def run_logistic_regression(df):
     # Split into features (U) and labels (d)
     U = df["utterance"]  # The dialog utterances (X)
     d = df["dialog_act"] # The dialog act labels (y)
-
     # Initialize CountVectorizer instance
     vectorizer = CountVectorizer()
     
@@ -29,11 +28,10 @@ def run_logistic_regression(df):
     # Make predictions on the test set
     d_pred = model.predict(U_test)
 
-    # Calculate accuracy
+    # Calculate accuracy (by hand)
     accuracy = accuracy_score(d_test, d_pred)
     print(f"Accuracy: {accuracy}\n")
 
-    # Print a classification report for detailed results
-    print(classification_report(y_test, y_pred))
+    # Evaluation report:
+    print(classification_report(d_test, d_pred))
     
-    return model  # Optionally return the model for future use
