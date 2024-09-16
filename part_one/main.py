@@ -28,6 +28,8 @@ utterance_clean_train, utterance_clean_test, label_clean_train, label_clean_test
     utterance_clean, label_clean, test_size=0.15
 )
 
+# BASELINE MODELS ======================================================================
+
 # Initialize and evaluate the model
 mc_model = MajorityClassModel(label_clean_train)
 
