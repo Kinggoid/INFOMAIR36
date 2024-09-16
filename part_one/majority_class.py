@@ -1,5 +1,6 @@
 #model that assigns labels to data based on the majority class of the training data
 
+
 class MajorityClassModel:
     # initialize model with training labels
     def __init__(self, labels):
@@ -23,3 +24,6 @@ class MajorityClassModel:
         
         # return accuracy
         return correct / len(data)
+    
+
+classifier = MajorityClassModel(Xc_train)
