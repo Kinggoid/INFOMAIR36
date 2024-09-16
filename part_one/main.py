@@ -28,6 +28,7 @@ utterance_clean_train, utterance_clean_test, label_clean_train, label_clean_test
     utterance_clean, label_clean, test_size=0.15, random_state=42
 )
 
+
 # BASELINE MODELS ======================================================================
 
 # Initialize and evaluate Majority class
@@ -38,8 +39,8 @@ mc_acc = mc_model.evaluate(utterance_clean_test, label_clean_test)
 print("Majority class model accuracy is", mc_acc)
 
 # initialize and evaluate keyword matching
-km_model = KeywordMatchingModel(utterance_clean_train, label_clean_train)
+km_model = KeywordMatchingModel(utterance_clean)
 
 #testing performance
-km_acc = km_model.evaluate(utterance_clean_test, label_clean_test)
+km_acc = km_model.evaluate(label_clean)
 print("Keyword matching model accuracy is ", km_acc)
