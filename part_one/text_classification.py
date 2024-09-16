@@ -1,10 +1,7 @@
 #import libraries
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import classification_report, accuracy_score
-import matplotlib.pyplot as plt
-import numpy as np
+
 
 #read dataset
 # file_path = 'D:\School\MAIR\dialog_acts.dat'
@@ -21,6 +18,10 @@ df['dialog_act'] = df['dialog_act'].str.split().str[0]
 df_clean['utterance'] = df_clean['dialog_act'].str.split().str[1:]
 df_clean['dialog_act'] = df_clean['dialog_act'].str.split().str[0]
 
+#joining words back into string
+df['utterance'] = df['utterance'].apply(lambda x: ' '.join(x) if isinstance(x, list) else x)
+df_clean['utterance'] = df_clean['utterance'].apply(lambda x: ' '.join(x) if isinstance(x, list) else x)
+
 #splitting data into train and test data
 X = df['utterance']
 y = df['dialog_act']
@@ -32,7 +33,7 @@ y_clean = df_clean['dialog_act']
 Xc_train, Xc_test, yc_train, yc_test = train_test_split(X_clean, y_clean, test_size = 0.15)
 
 
-print(Xc_train)
+DTC(dataframe)
 
 
 class MajorityClassModel:
