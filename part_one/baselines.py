@@ -18,7 +18,7 @@ class MajorityClassModel:
             if labels[i] == self.majorityClass:
                 correct += 1
 
-        training_accuracy = correct / len(data)
+        training_accuracy = correct / len(labels)
 
         return training_accuracy
 
