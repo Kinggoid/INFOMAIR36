@@ -5,4 +5,4 @@ This is the group logbook. Write here what you have been working on.
 
 14-09-2-24 Thijme -- half an hour. looking at what code was made and tried to understand it
 19/09/2024 Thijme -- 09:00 - 11:00 understanding and cleaning code
-19/09/2024 Thijme -- 11:15 - 12:20 reorganised all code, put it through the main, deleted duplicate code, pushed it to main, fixed error etc
+19/09/2024 Thijme -- 11:15 - 12:25 reorganised all code, put it through the main, deleted duplicate code, pushed it to main, fixed error, made all models into classes etc
