@@ -21,6 +21,12 @@ df['dialog_act'] = df['dialog_act'].str.split().str[0]
 df_clean['utterance'] = df_clean['dialog_act'].str.split().str[1:]
 df_clean['dialog_act'] = df_clean['dialog_act'].str.split().str[0]
 
+print(df['utterance'].head())
+print(type(df['utterance'].loc[0]))
+
+print(df['dialog_act'].head())
+print(type(df['dialog_act'].loc[0]))
+
 #join the words back into strings
 df['utterance'] = df['utterance'].apply(lambda x: ' '.join(x) if isinstance(x, list) else x)
 df_clean['utterance'] = df_clean['utterance'].apply(lambda x: ' '.join(x) if isinstance(x, list) else x)
@@ -37,7 +43,7 @@ def DTC(dataframe):
 
     #split data into train and test splits
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
-
+    print(type(X_train))
     #initialize decision tree classifier and fit to the data
     dtc = DecisionTreeClassifier(random_state=42)
     dtc.fit(X_train, y_train)
@@ -50,3 +56,5 @@ def DTC(dataframe):
     print(classification_report(y_test, y_pred))
 
 
+print('-------------------------------')
+DTC(df_clean)
