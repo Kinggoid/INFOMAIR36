@@ -6,6 +6,10 @@ from majority_class import MajorityClassModel
 import pickle
 from LogisticRegression import run_logistic_regression
 from Decision_tree import DTC
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+
 
 
 def datacleaning(file_path):
@@ -38,45 +42,66 @@ def datacleaning(file_path):
     return utterance_clean_train, utterance_clean_test, label_clean_train, label_clean_test
 
 
+def vectorize(X_train, X_test):
+    # Flatten each sublist in X_train and X_test by joining the strings with a space
+    X_train_flat = [' '.join(doc) for doc in X_train]
+    X_test_flat = [' '.join(doc) for doc in X_test]
+
+    # Initialize the TF-IDF vectorizer
+    vectorizer = TfidfVectorizer()
+
+    # Fit and transform the training data
+    X_train_tfidf = vectorizer.fit_transform(X_train_flat)
+
+    # Transform the test data
+    X_test_tfidf = vectorizer.transform(X_test_flat)
+
+
+    # Return the transformed data
+    return X_train_tfidf, X_test_tfidf
+
+    
+
+
 def main():
     file_path = 'part_one\dialog_acts.dat'
     X_train, X_test, y_train, y_test = datacleaning(file_path)
 
+    z = 3
+    if z==1:
+        # KEYWORDMATCHING -------------------------------------------------------------------
 
-    # MAJORITY CLASS -------------------------------------------------------------------
-    # mc_model =  MajorityClassModel(utterance_clean_train)
-    # # km_model =  KeywordMatchingModel(train_labels)
+        # initialize and evaluate keyword matching
+        km_model = KeywordMatchingModel(X_train)
 
-    # # Get accuracies
-    # mc_acc = mc_model.evaluate(utterance_clean_test, label_clean_test)
-    # print("Majority class model accuracy is", mc_acc)
-
-    # initialize and evaluate keyword matching
-    km_model = KeywordMatchingModel(X_train)
-
-    #testing performance
-    km_acc = km_model.evaluate(y_train)
-    print("Keyword matching model accuracy is ", km_acc)
-    # km_acc = km_model.evaluate(test_insts, test_labels)
-    # print("Keyword matching model accuracy is", km_acc)
+        #testing performance
+        km_acc = km_model.evaluate(y_train)
+        print("Keyword matching model accuracy is ", km_acc)
 
 
-    # LOGISTIC REGRESSION --------------------------------------------------------------
+    if z == 2:
+        # MAJORITY CLASS ------------------------------------------------------------------
+        mc = MajorityClassModel(y_train)
+        mc_acc = mc.evaluate(X_test, y_test)
+        print("Majority class model accuracy is ", mc_acc)
 
-    # print("Majority class model accuracy is", mc_acc)
+    X_train, X_test = vectorize(X_train, X_test)
 
-    # print('Logistic Regression df:')
-    # run_logistic_regression(utterance_clean_train, utterance_clean_test, label_clean_train, label_clean_test)
+    if z == 3:
+        # LOGISTIC REGRESSION --------------------------------------------------------------
+        print('Logistic Regression df:')
+
+        run_logistic_regression(X_train, X_test, y_train, y_test)
+    
 
 
-    # print('Logistic Regression df_clean:')
-    # run_logistic_regression(df_clean)
+    # DECISION TREE CLASSIFIER ---------------------------------------------------------
 
-    # # Decision Tree Classifier
-    # print('Decision Tree Classifier df:')
-    # DTC(df)
-    # print('Decision Tree Classifier df_clean:')
-    # DTC(df_clean)
+    if z == 4:
+        # Decision Tree Classifier
+        print('Decision Tree Classifier df:')
+        DTC(X_train, X_test, y_train, y_test)
+        
 
 
 
@@ -99,7 +124,7 @@ def main():
     # LOGISTIC REGRESSION --------------------------------------------------------------
     
 
-
+main()
 
     
 
