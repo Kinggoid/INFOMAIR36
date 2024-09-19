@@ -25,5 +25,3 @@ class MajorityClassModel:
         # return accuracy
         return correct / len(data)
     
-
-classifier = MajorityClassModel(Xc_train)

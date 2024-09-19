@@ -1,27 +1,3 @@
-class MajorityClassModel:
-    # Initialize model with training labels
-    def __init__(self, labels):
-        # Save labels for evaluate_ours method
-        self.labels = labels
-        # Set majority class as the label that has the highest occurrence
-        self.majorityClass = max(labels, key=labels.count)
-
-    # Assigns majority class label to input data
-    def test(self, input):
-        return self.majorityClass
-    
-    def evaluate(self, data, labels):
-
-        correct = 0
-
-        for i in range(len(labels)):
-            if labels[i] == self.majorityClass:
-                correct += 1
-
-        training_accuracy = correct / len(labels)
-
-        return training_accuracy
-
 # model that assigns labels to data based on keyword matching rules
 class KeywordMatchingModel():
     def __init__(self, input):
