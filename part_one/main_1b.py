@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
-from part_one.models.KeyWordMatching import KeywordMatchingModel
-from part_one.models.majority_class import MajorityClassModel
+import Levenshtein
+import random
+# from part_one.models.KeyWordMatching import KeywordMatchingModel
+# from part_one.models.majority_class import MajorityClassModel
 
 # Define states
 class DialogState:
@@ -71,17 +73,84 @@ def state_transition_function(current_dialog_state, user_input):
     return next_state, system_response
 
 # Identify user preference statements ---------------------------------------------------
-def extract_preferences(input):
 
-    # 16 examples have to work
-    # use keyword matching algorithm
-    # python-levenshtein
+def Levenshtein_matching(word, options):
 
-    return 
+    closest_matches = []
+    for option in options:
+        distance = Levenshtein.distance(word, option)
+        if distance <= 3:
+            closest_matches.append((option, distance))
+    
+    if closest_matches:
+        min_distance = min(closest_matches, key=lambda x: x[1])[1]
+        best_matches = [match for match, dist in closest_matches if dist == min_distance]
+        return random.choice(best_matches)
+
+    return None # No match with word from db
+
+def extract_preferences(user_utterence_input):
+    """
+    Functions to look for keywords that represents a type of cuisine, a location or a
+    price range.
+    """
+
+    # Remove stop words from utterence
+    # TO-DO
+    
+    preferences_dict = {"cuisine": "empty",
+                        "location": "empty",
+                        "pricerange": "empty"}
+
+    words = user_utterence_input.split()
+
+    # Alle opties uit database voor cuisine, loca en prijs
+    db_cuisine = {"world", "Swedish", "Tuscan", "international", "Chinese", "Persian", "Cuban"}
+    db_location = {"north", "south", "west", "east", "center"}
+    db_pricerange = {"cheap", "moderate", "expensive"}
+
+    # Keyword matching
+    for word in words:
+
+        if word in db_cuisine:
+            preferences_dict["cuisine"] = word
+        elif word in db_location:
+            preferences_dict["location"] = word
+        elif word in db_pricerange:
+            preferences_dict["pricerange"] = word
+    
+        # If no exact match, check for closest match
+        else:
+            closest_match = Levenshtein_matching(word.lower(), db_cuisine)
+            if closest_match:
+                preferences_dict["cuisine"] = closest_match
+                continue 
+
+            closest_match = Levenshtein_matching(word.lower(), db_location)
+            if closest_match:
+                preferences_dict["location"] = closest_match
+                continue
+
+            closest_match = Levenshtein_matching(word.lower(), db_pricerange)
+            if closest_match:
+                preferences_dict["pricerange"] = closest_match
+                continue
+
+    # 'dontcare'???? 'any' + area/price/location
+    # TO DO!
+
+    return preferences_dict
 
 # Function to retrieve restaurant suggestions from CSV file -----------------------------
 def lookup(preferences):
+    # Shape preferences:
+    # preferences_dict = {"cuisine": "English",
+    #                     "location": "north",
+    #                     "pricerange": "cheap"}
     list_of_possible_restaurants = []
+
+    # Your code
+
     return list_of_possible_restaurants
 
 # Example dialog simulation -------------------------------------------------------------
@@ -104,5 +173,8 @@ def run_dialog():
         print(f"System: {associated_system_utterence}")
 
 # Run the dialog
-run_dialog()
+#run_dialog()
 
+user_input = "I am looking for a cheap Chinese restaurant"
+preferences = extract_preferences(user_input)
+print(preferences)
