@@ -6,6 +6,7 @@ from functions import datacleaning, vectorize
 
 
 def main():
+
     file_path = 'part_one\dialog_acts.dat'
     X_train, X_test, y_train, y_test = datacleaning(file_path)
 
@@ -32,6 +33,8 @@ def main():
 
     model = LogisticRegressionModel()
     model.fit(X_train, y_train)
+    print(X_test[0])
+    print(y_test[0])
     model.evaluate(X_test, y_test)
 
 
