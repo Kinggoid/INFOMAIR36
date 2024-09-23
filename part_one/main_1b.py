@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from KeyWordMatching import KeywordMatchingModel
-from majority_class import MajorityClassModel
+from part_one.models.KeyWordMatching import KeywordMatchingModel
+from part_one.models.majority_class import MajorityClassModel
 
 # Define states
 class DialogState:
