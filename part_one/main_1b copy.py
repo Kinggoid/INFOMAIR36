@@ -102,7 +102,7 @@ def main():
 
     while current_state.name != "End":
         # Ask user for input
-        user_input = input("User: ").lower()
+        user_input = input("User: ")
 
         # Simulate a transition
         current_state = current_state.next_state(user_input)
