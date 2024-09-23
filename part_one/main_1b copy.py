@@ -1,6 +1,5 @@
 from models.KeyWordMatching import KeywordMatchingModel
-from models.LogisticRegression import LogisticRegressionModel
-from functions import datacleaning, vectorize
+from models.majority_class import MajorityClassModel
 
 
 class State:
@@ -53,43 +52,40 @@ def state_transition_function(current_state, user_input):
 
     return next_state, system_response
 
+# Example dialog simulation -------------------------------------------------------------
+def run_dialog(initial_state):
+    current_state = initial_state
+    print("System: Welcome to the dialog system.")
+
+    area = None
+    foodtype = None
+    price  = None
+    
+    while current_state.name != DialogState.END:
+
+        # 1. ACCEPT USER INPUT
+        user_input = input("User: ")
+
+
+        
+        # 2. CLASSIFY INPUT & MAKE STATE TRANSITION
+        next_state, associated_system_utterance = state_transition_function(current_state, user_input)
+
+        # (update)
+        current_state = next_state
+                
+
+
+        # 3. PRINT SYSTEM RESPONSE
+        print(f"System: {associated_system_utterance}")
+
+
 def lookup(preferences):
     list_of_possible_restaurants = []
     return list_of_possible_restaurants
 
 
-# Example dialog simulation -------------------------------------------------------------
-def run_dialog(model, initial_state):
-    # Example of using the state transitions
-    current_state = initial_state
-    print(f"Current state: {current_state.name}")
-    print(f"System: {current_state.message}")
-
-    while current_state.name != "End":
-        # Ask user for input
-        user_input = input("User: ")
-        print('-----------------------------------------------------------')
-        dialog_act = model.predict(user_input)
-        
-        print(f"User dialog act: {dialog_act}")
-
-
-        # Simulate a transition
-        current_state = current_state.next_state(dialog_act)
-        print(f"Next state: {current_state.name}")
-        print(f"System: {current_state.message}")
-
-
-
 def main():
-    file_path = 'part_one\dialog_acts.dat'
-    X_train, X_test, y_train, y_test = datacleaning(file_path)
-
-    X_train, X_test = vectorize(X_train, X_test)
-
-    model = LogisticRegressionModel()
-    model.fit(X_train, y_train)
-
     # Create states
     welcome_state = State("Welcome", "Welcome to the dialog system.")
     ask_area_state = State("Ask_area", "In what area would you like to eat?")
@@ -99,8 +95,21 @@ def main():
     welcome_state.add_transition("INFORM", ask_area_state)
     ask_area_state.add_transition("REQUEST", end_state) 
 
-    run_dialog(model, welcome_state)
+    # Example of using the state transitions
+    current_state = welcome_state
+    print(f"Current state: {current_state.name}")
+    print(f"System: {current_state.message}")
 
-    
+    while current_state.name != "End":
+        # Ask user for input
+        user_input = input("User: ").lower()
+
+        # Simulate a transition
+        current_state = current_state.next_state(user_input)
+        print(f"Next state: {current_state.name}")
+        print(f"System: {current_state.message}")
+
+    #Run the dialog
+    run_dialog(welcome_state)
 
 main()
