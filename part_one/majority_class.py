@@ -7,9 +7,11 @@ class MajorityClassModel:
         # set majority class as the label that has the highest occurence in the list
         self.majorityClass = max(labels,key=labels.count)
 
-    # assigns majority class label to input data
-    def test(self, input):
-        return self.majorityClass
+
+    # -------- I THINK THIS METHOD IS REDUNDANT --------------------
+    ## assigns majority class label to input data
+    #def test(self, input):
+    #    return self.majorityClass
     
     # evaluates model based on lists of test data and labels 
     def evaluate(self, data, labels):
@@ -19,7 +21,7 @@ class MajorityClassModel:
         # calculate accuracy of model
         correct = 0
         for i in range(0, len(data)):
-            if self.test(data[i]) == labels[i]:
+            if self.majorityClass == labels[i]: #instead of using the test() method, I just used self.majorityClass cause that returns the same thing
                 correct += 1
         
         # return accuracy

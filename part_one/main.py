@@ -17,11 +17,11 @@ def datacleaning(file_path):
     df.columns = ['dialog_act']
 
     # Cleaning dataset
-    # Cleaning dataset
     df_clean = df.drop_duplicates()
 
-    # Adding structure to database, separating dialog_acts and utterances
-    df_clean = df_clean.copy()  # Create a deep copy to avoid SettingWithCopyWarning
+    # Create a deep copy to avoid SettingWithCopyWarning
+    df_clean = df_clean.copy()
+
     # Adding structure to database, separating dialog_acts and utterances
     df['utterance'] = df['dialog_act'].str.split().str[1:]
     df['dialog_act'] = df['dialog_act'].str.split().str[0]
@@ -81,23 +81,23 @@ def main():
     mc_acc = mc.evaluate(X_test, y_test)
     print("Majority class model accuracy is ", mc_acc)
 
-    X_train, X_test = vectorize(X_train, X_test)
+    x_train, x_test = vectorize(X_train, X_test)
 
 
-    # LOGISTIC REGRESSION --------------------------------------------------------------
-    print('Logistic Regression df:')
+    # logistic regression --------------------------------------------------------------
+    print('logistic regression df:')
 
     model = LogisticRegressionModel()
-    model.fit(X_train, y_train)
-    model.evaluate(X_test, y_test)
+    model.fit(x_train, y_train)
+    model.evaluate(x_test, y_test)
 
 
-    # DECISION TREE CLASSIFIER ---------------------------------------------------------
+    # decision tree classifier ---------------------------------------------------------
 
     # if z == 4:
     model = DecisionTreeModel()
-    model.fit(X_train, y_train)
-    model.evaluate(X_test, y_test)
+    model.fit(x_train, y_train)
+    model.evaluate(x_test, y_test)
     
 
 main()
