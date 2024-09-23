@@ -1,5 +1,9 @@
 from models.KeyWordMatching import KeywordMatchingModel
-from models.majority_class import MajorityClassModel
+from models.LogisticRegression import LogisticRegressionModel
+from functions import datacleaning, vectorize, clean_single_string
+from sklearn.feature_extraction.text import TfidfVectorizer
+import random
+
 
 
 class State:
@@ -17,7 +21,6 @@ class State:
             return self.transitions[input]
         else:
             return self
-
 
 
 # STATE TRANSITION FUNCTION: ----------------------------------------------------------
@@ -52,40 +55,123 @@ def state_transition_function(current_state, user_input):
 
     return next_state, system_response
 
-# Example dialog simulation -------------------------------------------------------------
-def run_dialog(initial_state):
-    current_state = initial_state
-    print("System: Welcome to the dialog system.")
-
-    area = None
-    foodtype = None
-    price  = None
-    
-    while current_state.name != DialogState.END:
-
-        # 1. ACCEPT USER INPUT
-        user_input = input("User: ")
-
-
-        
-        # 2. CLASSIFY INPUT & MAKE STATE TRANSITION
-        next_state, associated_system_utterance = state_transition_function(current_state, user_input)
-
-        # (update)
-        current_state = next_state
-                
-
-
-        # 3. PRINT SYSTEM RESPONSE
-        print(f"System: {associated_system_utterance}")
-
-
 def lookup(preferences):
     list_of_possible_restaurants = []
     return list_of_possible_restaurants
 
+# Identify user preference statements ---------------------------------------------------
+
+def Levenshtein_matching(word, options):
+
+    closest_matches = []
+    for option in options:
+        distance = Levenshtein.distance(word, option)
+        if distance <= 3:
+            closest_matches.append((option, distance))
+    
+    if closest_matches:
+        min_distance = min(closest_matches, key=lambda x: x[1])[1]
+        best_matches = [match for match, dist in closest_matches if dist == min_distance]
+        return random.choice(best_matches)
+
+    return None # No match with word from db
+
+
+def extract_preferences(user_utterence_input):
+    """
+    Functions to look for keywords that represents a type of cuisine, a location or a
+    price range.
+    """
+
+    # Remove stop words from utterence
+    # TO-DO
+    
+    preferences_dict = {"cuisine": "empty",
+                        "location": "empty",
+                        "pricerange": "empty"}
+
+    words = user_utterence_input.split()
+
+    # Alle opties uit database voor cuisine, loca en prijs
+    db_cuisine = {"world", "Swedish", "Tuscan", "international", "Chinese", "Persian", "Cuban"}
+    db_location = {"north", "south", "west", "east", "center"}
+    db_pricerange = {"cheap", "moderate", "expensive"}
+
+    # Keyword matching
+    for word in words:
+
+        if word in db_cuisine:
+            preferences_dict["cuisine"] = word
+        elif word in db_location:
+            preferences_dict["location"] = word
+        elif word in db_pricerange:
+            preferences_dict["pricerange"] = word
+    
+        # If no exact match, check for closest match
+        else:
+            closest_match = Levenshtein_matching(word.lower(), db_cuisine)
+            if closest_match:
+                preferences_dict["cuisine"] = closest_match
+                continue 
+
+            closest_match = Levenshtein_matching(word.lower(), db_location)
+            if closest_match:
+                preferences_dict["location"] = closest_match
+                continue
+
+            closest_match = Levenshtein_matching(word.lower(), db_pricerange)
+            if closest_match:
+                preferences_dict["pricerange"] = closest_match
+                continue
+
+    # 'dontcare'???? 'any' + area/price/location
+    # TO DO!
+
+    return preferences_dict
+
+
+# Example dialog simulation -------------------------------------------------------------
+def run_dialog(model, initial_state):
+    # Example of using the state transitions
+    current_state = initial_state
+    print(f"Current state: {current_state.name}")
+    print(f"System: {current_state.message}")
+
+    while current_state.name != "End":
+        # Ask user for input
+        user_input = input("User: ")
+        print('-----------------------------------------------------------')
+        user_input = user_input.split()
+        print('-----------------------------------------------------------')
+        vectorizer = TfidfVectorizer()
+        print('-----------------------------------------------------------')
+        # Fit and transform the training data
+        print(user_input)
+        # vectorized_user_input = vectorizer.fit_transform(user_input)
+
+        # print(vectorized_user_input)
+        print('-----------------------------------------------------------')
+        dialog_act = model.predict(user_input)
+        
+        print(f"User dialog act: {dialog_act}")
+
+
+        # Simulate a transition
+        current_state = current_state.next_state(dialog_act)
+        print(f"Next state: {current_state.name}")
+        print(f"System: {current_state.message}")
+
+
 
 def main():
+    file_path = 'part_one\dialog_acts.dat'
+    X_train, X_test, y_train, y_test = datacleaning(file_path)
+
+    X_train, X_test = vectorize(X_train, X_test)
+
+    model = LogisticRegressionModel()
+    model.fit(X_train, y_train)
+
     # Create states
     welcome_state = State("Welcome", "Welcome to the dialog system.")
     ask_area_state = State("Ask_area", "In what area would you like to eat?")
@@ -95,21 +181,9 @@ def main():
     welcome_state.add_transition("INFORM", ask_area_state)
     ask_area_state.add_transition("REQUEST", end_state) 
 
-    # Example of using the state transitions
-    current_state = welcome_state
-    print(f"Current state: {current_state.name}")
-    print(f"System: {current_state.message}")
+    print("Welcome to the dialog system.")
+    run_dialog(model, welcome_state)
 
-    while current_state.name != "End":
-        # Ask user for input
-        user_input = input("User: ")
-
-        # Simulate a transition
-        current_state = current_state.next_state(user_input)
-        print(f"Next state: {current_state.name}")
-        print(f"System: {current_state.message}")
-
-    #Run the dialog
-    run_dialog(welcome_state)
+    
 
 main()

@@ -34,6 +34,15 @@ def datacleaning(file_path):
     return utterance_clean_train, utterance_clean_test, label_clean_train, label_clean_test
 
 
+def clean_single_string(input_string):
+    # Split the input string into dialog act and utterance
+    parts = input_string.split()
+    dialog_act = parts[0]
+    utterance = parts[1:]
+    
+    return dialog_act, utterance
+
+
 def vectorize(X_train, X_test):
     # Flatten each sublist in X_train and X_test by joining the strings with a space
     X_train_flat = [' '.join(doc) for doc in X_train]
