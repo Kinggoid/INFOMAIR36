@@ -9,3 +9,5 @@ This is the group logbook. Write here what you have been working on.
 
 19-9-2024, Amir -- worked on fixing further bugs in the baseline models and trying to make a start on 1b. 2-3h work.
 
+24/25-9-2024 Jennifer -- finished lookup function and extract preference functions, 2h work. (also helped monday working together with Amir and Thijme)
+
