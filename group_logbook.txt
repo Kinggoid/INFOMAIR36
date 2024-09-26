@@ -4,6 +4,8 @@ This is the group logbook. Write here what you have been working on.
 13-9-2024 Jennifer -- Added Majority class classifier (with Oliver) and the Keyword Matching classifier (rules still have to be added for improvement). 2h work.
 
 14-09-2-24 Thijme -- half an hour. looking at what code was made and tried to understand it
+
+16-9-2024 Amir, -- worked on making the merging of all our codes work in order to hand it in. 4h work
 19/09/2024 Thijme -- 09:00 - 11:00 understanding and cleaning code
 19/09/2024 Thijme -- 11:15 - 12:35 reorganised all code, put it through the main, deleted duplicate code, pushed it to main, fixed error, made all models into classes etc
 
