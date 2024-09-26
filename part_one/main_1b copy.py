@@ -31,17 +31,19 @@ def state_transition_function(current_state, user_input):
     # 1. Convert user input to lower case
     user_input = user_input.lower()
 
-    # 2. Classify input (classifier 1a) >> TO-DO later
-    dialog_act = KeywordMatchingModel(user_input)
-    dialog_act = "hello"
+    ################# WE DO NOT USE THIS I THINK ########################
+    ## 2. Classify input (classifier 1a) >> TO-DO later
+    #dialog_act = KeywordMatchingModel(user_input)
+    #dialog_act = "hello"
 
-    # 3. Update dialogstate and decide system output (as in state transition diagram!)
-    next_state = current_state.next_state(dialog_act)
-    system_response = ""
+    ## 3. Update dialogstate and decide system output (as in state transition diagram!)
+    #next_state = current_state.next_state(dialog_act)
+    #system_response = ""
 
     if current_state.name == DialogState.WELCOME:
         if dialog_act == DialogAct.HELLO:
             system_response = "In what area would you like to eat?"
+        elif dialog_act == DialogAct.INFORM:
 
     elif current_state.name == DialogState.ASK_AREA:
         print("State switch to dialogState = ASK_AREA")
@@ -141,28 +143,19 @@ def run_dialog(model, vectorizer, initial_state):
     while current_state.name != "End":
         # Ask user for input
         user_input = input("User: ")
-        print('-----------------------------------------------------------')
-        print('-----------------------------------------------------------')
-        # Fit and transform the training data
-        print(user_input)
+        #print(user_input)
 
+        # Fit and transform the training data
         vectorized_user_input = vectorizer.transform([user_input])
 
-        print(vectorized_user_input)
-        print('-----------------------------------------------------------')
+        #print(vectorized_user_input)
         dialog_act = model.predict(vectorized_user_input)
         
         print(f"User dialog act: {dialog_act}")
 
-
         # Simulate a transition
-        print('-----------------------------------------------------------')
         current_state = current_state.next_state(dialog_act[0])
-        print('-----------------------------------------------------------')
-
         print(f"Next state: {current_state.name}")
-        print('-----------------------------------------------------------')
-
         print(f"System: {current_state.message}")
 
 
@@ -177,13 +170,18 @@ def main():
     # Create states
     welcome_state = State("Welcome", "Welcome to the dialog system.")
     ask_area_state = State("Ask_area", "In what area would you like to eat?")
+    ask_food_state = State("Ask_food", "What type of food are you looking for?")
+    ask_price_state = State("Ask_price", "What type of price range are you looking for?")
+    double_check_state = State("Double_check","So you want to eat at VAR place?")
+    no_match_state = State("No_match", "Sorry, such a restaurant does not exist")
+    suggest_restaurant_state = State("Suggest_restaurant", "VAR is a nice restaurant to eat at")
+    give_info_state = State("Give_info", "The info for this restaurant is VAR")
     end_state = State("End", "The conversation has ended.")
 
     # Add transitions
     welcome_state.add_transition("inform", ask_area_state)
     ask_area_state.add_transition("request", end_state) 
 
-    print("Welcome to the dialog system.")
     run_dialog(model, vectorizer, welcome_state)
 
     
