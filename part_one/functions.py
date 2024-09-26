@@ -1,8 +1,8 @@
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
+import pickle
 
 def datacleaning(file_path):
     
@@ -34,15 +34,6 @@ def datacleaning(file_path):
     return utterance_clean_train, utterance_clean_test, label_clean_train, label_clean_test
 
 
-def clean_single_string(input_string):
-    # Split the input string into dialog act and utterance
-    parts = input_string.split()
-    dialog_act = parts[0]
-    utterance = parts[1:]
-    
-    return dialog_act, utterance
-
-
 def vectorize(X_train, X_test):
     # Flatten each sublist in X_train and X_test by joining the strings with a space
     X_train_flat = [' '.join(doc) for doc in X_train]
@@ -57,6 +48,5 @@ def vectorize(X_train, X_test):
     # Transform the test data
     X_test_tfidf = vectorizer.transform(X_test_flat)
 
-
     # Return the transformed data
-    return X_train_tfidf, X_test_tfidf
+    return vectorizer, X_train_tfidf, X_test_tfidf
