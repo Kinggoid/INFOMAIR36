@@ -9,3 +9,6 @@ This is the group logbook. Write here what you have been working on.
 
 19-9-2024, Amir -- worked on fixing further bugs in the baseline models and trying to make a start on 1b. 2-3h work.
 
+23-9-2024, Amir -- worked on 1b after school and spent some time also trying to fix the last bugs before handing it in: 6h work
+
+26-9-2024, Amir -- worked on state-transition function after school. 3.5h work
