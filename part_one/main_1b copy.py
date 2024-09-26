@@ -141,27 +141,22 @@ def run_dialog(model, vectorizer, initial_state):
     while current_state.name != "End":
         # Ask user for input
         user_input = input("User: ")
-        print('-----------------------------------------------------------')
-        print('-----------------------------------------------------------')
+        
         # Fit and transform the training data
         print(user_input)
 
         vectorized_user_input = vectorizer.transform([user_input])
 
         print(vectorized_user_input)
-        print('-----------------------------------------------------------')
         dialog_act = model.predict(vectorized_user_input)
         
         print(f"User dialog act: {dialog_act}")
 
 
         # Simulate a transition
-        print('-----------------------------------------------------------')
         current_state = current_state.next_state(dialog_act[0])
-        print('-----------------------------------------------------------')
 
         print(f"Next state: {current_state.name}")
-        print('-----------------------------------------------------------')
 
         print(f"System: {current_state.message}")
 
@@ -181,7 +176,7 @@ def main():
 
     # Add transitions
     welcome_state.add_transition("inform", ask_area_state)
-    ask_area_state.add_transition("request", end_state) 
+    ask_area_state.add_transition("hello", end_state) 
 
     print("Welcome to the dialog system.")
     run_dialog(model, vectorizer, welcome_state)
