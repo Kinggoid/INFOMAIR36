@@ -4,6 +4,13 @@ import re
 import pandas as pd
 import Levenshtein
 
+########## not worked out yet ##############
+class state_diagram:
+    def __init__(self, states):
+        self.area = None
+        self.food = None
+        self.price = None
+
 
 class State:
     def __init__(self, name, message):
@@ -70,8 +77,8 @@ def extract_preferences(user_utterence_input):
                  "and", "on", "that", "please", "with", "find", "it"}
     words = [word.lower() for word in words if word.lower() not in stopwords]
     
-    preferences_dict = {"cuisine": "empty",
-                        "location": "empty",
+    preferences_dict = {"location": "empty",
+                        "cuisine": "empty",
                         "pricerange": "empty"}
 
     # Save all the options for typefood, area and location
@@ -167,34 +174,35 @@ def lookup(preferences):
 
 
 # Example dialog simulation -------------------------------------------------------------
-def run_dialog(model, vectorizer, initial_state):
-
-    # Example of using the state transitions
+def state_transition_function(initial_state, user_input, dialog_act):
+    #show current state
     current_state = initial_state
     print(f"Current state: {current_state.name}")
     print(f"System: {current_state.message}")
 
-    while current_state.name != "End":
-        # Ask user for input
-        user_input = input("User: ")
-        
-        # Fit and transform the training data
-        print(user_input)
+    #only assign preference_dict if its an INFORM act
+    if dialog_act == "INFORM":
+        preference_dict = extract_preferences(user_input)
 
-        vectorized_user_input = vectorizer.transform([user_input])
+    #logic for state transitions
+    if current_state == welcome_state:      # Go to ask_area state if you do not know where the user wants to eat
+        if dialog_act == "INFORM":
+            if preference_dict[0] == "empty":
+               current_state = ask_area_state
+               return ask_area_state
+    elif current_state == ask_area_state:   # Go to ask_food_state if you do not know what food the user wants to eat
+        if dialog_act == "INFORM":
+            if preference_dict[1] == "empty":
+                current_state == ask_food_state
+                return current_state
+    elif current_state == ask_food_state:   # Go to ask_price state if you do not know what price the user wants to pay
+        if dialog_act == "INFORM":
+            if preference_dict[2] == "empty":
+                current_state == ask_price_state
+                return current_state
 
-        print(vectorized_user_input)
-        dialog_act = model.predict(vectorized_user_input)
-        
-        print(f"User dialog act: {dialog_act}")
 
 
-        # Simulate a transition
-        current_state = current_state.next_state(dialog_act[0])
-
-        print(f"Next state: {current_state.name}")
-
-        print(f"System: {current_state.message}")
 
 
 def main():
@@ -208,14 +216,37 @@ def main():
     # Create states
     welcome_state = State("Welcome", "Welcome to the dialog system.")
     ask_area_state = State("Ask_area", "In what area would you like to eat?")
+    ask_food_state = State("Ask_food", "What type of food are you looking for?")
+    ask_price_state = State("Ask_price", "What type of price range are you looking for?")
+    double_check_state = State("Double_check","So you want to eat at VAR place?")
+    no_match_state = State("No_match", "Sorry, such a restaurant does not exist")
+    suggest_restaurant_state = State("Suggest_restaurant", "VAR is a nice restaurant to eat at")
+    give_info_state = State("Give_info", "The info for this restaurant is VAR")
     end_state = State("End", "The conversation has ended.")
 
-    # Add transitions
-    welcome_state.add_transition("inform", ask_area_state)
-    ask_area_state.add_transition("hello", end_state) 
+    #welcoming user 
+    print(f"Current state: {welcome_state.name}")
+    print(f"System: {welcome_state.message}")
 
-    print("Welcome to the dialog system.")
-    run_dialog(model, vectorizer, welcome_state)
+    #setting current state
+    current_state = welcome_state
+
+    #iterate until you reach the end state
+    while current_state.name != "End":
+        #getting user input
+        user_input = input("User: ")
+        #vectorizing input to use for ML model
+        vectorized_user_input = vectorizer.transform([user_input])
+        #classifying user input using ML model
+        dialog_act = model.predict(vectorized_user_input)
+        #print dialog_act
+        print(f"User dialog act: {dialog_act}")
+
+        #get upcoming state
+        current_state = state_transition_function(current_state, user_input, dialog_act)
+        print(f"System: {current_state.message}")
+
+
 
 
 main()
