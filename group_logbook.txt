@@ -11,6 +11,9 @@ This is the group logbook. Write here what you have been working on.
 
 19-9-2024, Amir -- worked on fixing further bugs in the baseline models and trying to make a start on 1b. 2-3h work.
 
-23-9-2024 Thijme, Amir and Jennifer worked on project together again for hours
-24/25-9-2024 Jennifer -- finished lookup function and extract preference functions, 3h work. (also helped monday working together with Amir and Thijme)
+23-9-2024 Thijme, Amir and Jennifer worked on project together again for hours (express preferences)
 
+20/9/2024 Jennifer -- uurtje aan startup/outline 1b gewerkt
+24/25-9-2024 Jennifer -- finished lookup function and extract preference functions, 3h work. (also helped monday working together with Amir and Thijme)
+26-9-2024 Jennifer -- improven schema met Thijme en logica regels voor express preferences afronden, again een paar uurtjes
+27-9-2024 Jennifer -- in ochtend met thijme gebeld voor een uurtje en geprobeerd logica regels te verzinnen, daarna nog verder gewerkt om eindelijk eindelijk die lookup en extract preferences helemaal af te hebben (2.5u)

@@ -1,6 +1,6 @@
 from models.KeyWordMatching import KeywordMatchingModel
 from models.LogisticRegression import LogisticRegressionModel
-from functions import datacleaning, vectorize, clean_single_string
+from functions import datacleaning, vectorize
 from sklearn.feature_extraction.text import TfidfVectorizer
 import random
 import Levenshtein
@@ -90,13 +90,36 @@ def extract_preferences(user_utterence_input):
     user_utterence_input = re.sub(r'[^\w\s]', '', user_utterence_input)
     words = user_utterence_input.split()
 
-    # TO-DO: "don't care" >> turn into one word or something else
+    # Glue doesntmatter & dontcare together to be recognized for 'dontcare' label
+    final_words = []
+    skip_next_word = 0
+
+    for i, word in enumerate(words):
+        
+        # Skip the next word after word-combo has already been added to copy words
+        if skip_next_word == 1:
+            # Reset
+            skip_next_word = 0
+            continue
+        
+        # Loop through sentence and make an adjusted copy
+        if word == "dont" and words[i+1] == "care" and i+1<len(words):
+            final_words.append("dontcare")
+            skip_next_word = 1
+        elif word == "doesnt" and words[i+1] == "matter" and i+1<len(words):
+            final_words.append("doesntmatter")
+            skip_next_word = 1
+        else:
+            final_words.append(word)
+
+    words = final_words
 
     # Remove stop words from utterence
     stopwords = {"i", "am", "looking", "for", "a", "an", "the", "in", "to", "of", "is",
                  "and", "on", "that", "please", "with", "find", "it"}
     words = [word.lower() for word in words if word.lower() not in stopwords]
-    
+    print(words)
+
     preferences_dict = {"cuisine": "empty",
                         "location": "empty",
                         "pricerange": "empty"}
@@ -108,7 +131,7 @@ def extract_preferences(user_utterence_input):
     db_cuisine = set(df['food'].dropna().str.lower())
 
     # Predefined 'dontcare' signaling words + area/food/price specification words
-    dontcare_signal = {'any', 'whatever', 'dontcare'}
+    dontcare_signal = {'any', 'whatever', "dontcare", "doesntmatter", "anywhere", "rest"}
     location_signal = {"area", "location", "part", "place", "town"}
     cuisine_signal = {"food", "cuisine", "type", "restaurant", "eat", "serves"}
     pricerange_signal = {"price", "cost", "budget"}
@@ -116,7 +139,6 @@ def extract_preferences(user_utterence_input):
     # Go through the sentence(s)
     for i, word in enumerate(words):
 
-        # TO-DO: what to do with 'world'/ 'Swedish'
         # Keyword matching
         if word in db_cuisine:
             preferences_dict["cuisine"] = word
@@ -141,25 +163,39 @@ def extract_preferences(user_utterence_input):
                 preferences_dict["undefined_context"] = 'dontcare'
 
         # If no exact match, check for closest match
-        elif word != 'want':        # TO-DO: 'part'/'want' turns into 'east'or 'west' with Levenshtein
+        elif len(word) > 4:        # Only 'longer' words bc otherwise filter is too broad
             closest_match = Levenshtein_matching(word.lower(), db_cuisine)
             if closest_match:
                 print(word, closest_match)
-                preferences_dict["cuisine"] = closest_match
-                continue 
+                if preferences_dict["cuisine"] == "empty": # Only fill up when no other value saved: 'west part of town'
+                    preferences_dict["cuisine"] = closest_match
+                    continue 
 
             closest_match = Levenshtein_matching(word.lower(), db_areas)
             if closest_match:
                 print(word, closest_match)
-                preferences_dict["location"] = closest_match
-                continue
+                if preferences_dict["location"] == "empty":
+                    preferences_dict["location"] = closest_match
+                    continue
 
             closest_match = Levenshtein_matching(word.lower(), db_pricerange)
             if closest_match:
                 print(word, closest_match)
-                preferences_dict["pricerange"] = closest_match
-                continue
-        
+                if preferences_dict["pricerange"] == "empty":
+                    preferences_dict["pricerange"] = closest_match
+                    continue
+
+        # Final check: possible unrecognized foodtype preference missed?
+        elif word == 'food' and preferences_dict["cuisine"] == "empty":
+            
+            # Option 1: "serving"/"for" + preference + "food"
+            if i - 2 > 0 and (words[i-2].startswith("serv") or words[i-2] == "for"):
+                preferences_dict["cuisine"] = words[i-1]
+
+            # Option 2: nationality ending with -ish or -an + "food"
+            elif i-1 > 0 and (words[i-1].endswith("ish") or words[i-1].endswith("an")):
+                preferences_dict["cuisine"] = words[i-1]
+
     return preferences_dict
 
 
@@ -169,6 +205,7 @@ def lookup(preferences):
     Function that takes the preference dictionary (stating cuisine, area and pricerange
     preferences) and loops through the restaurant_info.csv file to find possible restaurants.
     These names are saved in a list and given as output.
+    NOTE: Needs fully filled preference dict (doesn't deal with empty values)
     """
 
     # Read CSV
@@ -184,8 +221,6 @@ def lookup(preferences):
 
     if preferences["pricerange"] != "dontcare":
         df = df[df["pricerange"].str.lower() == preferences["pricerange"]]
-
-    # NOTE: dealt nog niet met 'empty', ergens anders wann 'dontcare' veranderen in dict
 
     # Save names to list
     list_of_possible_restaurants = df["restaurantname"].tolist()
@@ -256,19 +291,20 @@ def main():
 user_input = "I'm looking for world food"
 user_input= "I want a restaurant that serves world food"
 user_input= "I want a restaurant serving Swedish food"
-user_input= "I'm looking for a restaurant in the center" # Check
-user_input= "I would like a cheap restaurant in the west part of town"
-user_input= "I'm looking for a moderately priced restaurant in the west part of town"
-user_input= "I'm looking for a restaurant in any area that serves Tuscan food" # Check
-user_input= "Can I have an expensive restaurant"
-user_input= "I'm looking for an expensive restaurant and it should serve international food"
-user_input= "I need a Cuban restaurant that is moderately priced" # Check
-user_input= "I'm looking for a moderately priced restaurant with Catalan food" # Check
-user_input= "What is a cheap restaurant in the south part of town"
-user_input= "What about Chinese food" # Check
-user_input= "I wanna find a cheap restaurant"
-user_input= "I'm looking for Persian food please" # Check
-user_input= "Find a Cuban restaurant in the center" # Check
+# user_input= "I'm looking for a restaurant in the center" # Check
+# user_input= "I would like a cheap restaurant in the west part of town" # Check
+# user_input= "I'm looking for a moderately priced restaurant in the west part of town" # Check
+# user_input= "I'm looking for a restaurant in any area that serves Tuscan food" # Check
+# user_input= "Can I have an expensive restaurant" # Check
+# user_input= "I'm looking for an expensive restaurant and it should serve international food" # Check
+# user_input= "I need a Cuban restaurant that is moderately priced" # Check
+# user_input= "I'm looking for a moderately priced restaurant with Catalan food" # Check
+# user_input= "What is a cheap restaurant in the south part of town" # Check
+# user_input= "What about Chinese food" # Check
+# user_input= "I wanna find a cheap restaurant" # Check
+# user_input= "I'm looking for Persian food please" # Check
+# user_input= "Find a Cuban restaurant in the center" # Check
+# user_input = "I don't care"
 
 preference_dict = extract_preferences(user_input)
 print(preference_dict)
