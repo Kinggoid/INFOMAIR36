@@ -9,3 +9,8 @@ This is the group logbook. Write here what you have been working on.
 
 19-9-2024, Amir -- worked on fixing further bugs in the baseline models and trying to make a start on 1b. 2-3h work.
 
+23-9-2024 Thijme -- 17:00 - 21:30 coderen
+26-9-2024 Thijme -- 09:00 - 11:00 coderen
+26-9-2024 Thijme -- 11:15 - 12:00 coderen
+26-9-2024 Thijme -- 13:00 - 16:30 state diagram
+27-9-2024 Thijme -- 10:00 - 
