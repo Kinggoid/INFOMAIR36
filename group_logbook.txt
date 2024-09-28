@@ -22,4 +22,4 @@ This is the group logbook. Write here what you have been working on.
 27-9-2024 Thijme -- 10:00 - 
 
 28-9-2024 Oliver -- looked at code and other examples to prepare remodelling of 1b - 1hr 
-
+28-9-2024 Oliver -- created report word doc with heading and outlines - 0.5hr
