@@ -13,11 +13,13 @@ This is the group logbook. Write here what you have been working on.
 
 23-9-2024 Thijme -- 17:00 - 21:30 coderen
 23-9-2024, Amir -- worked on 1b after school and spent some time also trying to fix the last bugs before handing it in: 6h work
+23-9-2024, Oliver -- worked on state diagram: 4 hrs
+
 26-9-2024, Amir -- worked on state-transition function after school. 3.5h work
 26-9-2024 Thijme -- 09:00 - 11:00 coderen
 26-9-2024 Thijme -- 11:15 - 12:00 coderen
 26-9-2024 Thijme -- 13:00 - 16:30 state diagram
 27-9-2024 Thijme -- 10:00 - 
 
-
+28-9-2024 Oliver -- looked at code and other examples to prepare remodelling of 1b - 1hr 
 
