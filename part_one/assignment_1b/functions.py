@@ -1,19 +1,17 @@
 import random
 import re
 import pandas as pd
-from Levenshtein import distance as Levenshtein
+from Levenshtein import distance
 
 
-# Identify user preference statements ---------------------------------------------------
-
-def Levenshtein_matching(word: str, options: list, threshold: int = 3) -> str:
+def Levenshtein_matching(word: str, options: list, threshold: int = 2) -> str:
     """
     Finds the closest match for a word from a list of options using Levenshtein distance.
 
     Parameters:
     word (str): The word to match.
     options (list): A list of possible options.
-    threshold (int): The maximum distance to consider a match. Default is 3.
+    threshold (int): The maximum distance to consider a match. Default is 2.
 
     Returns:
     str: The closest matching word from the options, or None if no match is found within the threshold.
@@ -22,18 +20,17 @@ def Levenshtein_matching(word: str, options: list, threshold: int = 3) -> str:
     distances = []
 
     for option in options:
-        distance = Levenshtein.distance(word, option)
-        if distance <= threshold:
-            closest_matches.append(option)
-            distances.append(distance)
+        dist = distance(word, option)  # Use `distance` directly here
+        if dist <= threshold:
+            closest_matches.append((option, dist))
+            distances.append(dist)
     
     if closest_matches:
-        min_distance = min(closest_matches, key=lambda x: x[1])[1]
+        min_distance = min(distances)
         best_matches = [match for match, dist in closest_matches if dist == min_distance]
         return random.choice(best_matches)
 
     return None  # No match with word from db
-
 
 def extract_preferences(user_utterence_input):
     """
@@ -57,7 +54,7 @@ def extract_preferences(user_utterence_input):
                         "pricerange": "empty"}
 
     # Save all the options for typefood, area and location
-    df = pd.read_csv('part_one\\restaurant_info.csv')
+    df = pd.read_csv('part_one/data/restaurant_info.csv')
     db_pricerange = set(df['pricerange'].dropna().str.lower())
     db_areas = set(df['area'].dropna().str.lower())
     db_cuisine = set(df['food'].dropna().str.lower())
@@ -71,6 +68,7 @@ def extract_preferences(user_utterence_input):
     # Go through the sentence(s)
     for i, word in enumerate(words):
 
+
         # TO-DO: what to do with 'world'/ 'Swedish'
         # Keyword matching
         if word in db_cuisine:
@@ -79,6 +77,7 @@ def extract_preferences(user_utterence_input):
             preferences_dict["location"] = word
         elif word in db_pricerange:
             preferences_dict["pricerange"] = word
+        
         
         # Check for 'dontcare' preference value
         elif word in dontcare_signal:
@@ -116,6 +115,7 @@ def extract_preferences(user_utterence_input):
                 continue
         
     return preferences_dict
+
 
 
 # Function to retrieve restaurant suggestions from CSV file -----------------------------
