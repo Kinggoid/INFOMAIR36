@@ -6,6 +6,9 @@ import Levenshtein
 from state import State
 from state_diagram import State_diagram
 from functions import *
+import sys
+import os
+import pickle
 
 def main():
     # Load the trained logistic regression model
@@ -72,8 +75,5 @@ def main():
         print(f"System: {current_state.message}")
 
 
-main()
-
-
-
-
+if __name__ == "__main__":
+    main()

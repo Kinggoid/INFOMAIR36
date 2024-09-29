@@ -54,4 +54,6 @@ def main():
     with open(r'part_one/trained_models/dt_model.pkl', 'wb') as f:
         pickle.dump(dt_model, f)
 
-main()
+
+if __name__ == "__main__":
+    main()
