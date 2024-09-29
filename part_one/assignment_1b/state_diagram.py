@@ -45,10 +45,10 @@ class State_diagram:
 
 
         elif self.state == "ask_preferences":
-            # self.preferences_dict = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
-            self.preferences_dict = self.preferences_dict = {"area": None,
-                        "food type": "chinese",
-                        "pricerange": None}
+            self.preferences_dict = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+            # self.preferences_dict = self.preferences_dict = {"area": None,
+            #             "food type": "chinese",
+            #             "pricerange": None}
             
             missing_preferences = [pref for pref, value in self.preferences_dict.items() if value is None]
 
@@ -78,9 +78,14 @@ class State_diagram:
 
         elif self.state == "ask_area":
             if dialog_act == "inform":
-                
-                self.preferences_dict["area"] = user_input
+                print('----------------------------------------')
+                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+                self.preferences_dict["area"] = extracted_preferences.get("area", None)
                 self.state = "ask_preferences"
+                print(extracted_preferences)
+                print(self.preferences_dict)
+                print(self.state)
+
                 self.is_state = False
             else:
                 print("System: I am sorry, I did not understand that. Please provide me with more information about your preferences.")
@@ -88,7 +93,8 @@ class State_diagram:
 
         elif self.state == "ask_food_type":
             if dialog_act == "inform":
-                self.preferences_dict["food type"] = user_input
+                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+                self.preferences_dict["food type"] = extracted_preferences.get("food type", None)
                 self.state = "ask_preferences"
                 self.is_state = False
             else:
@@ -97,7 +103,8 @@ class State_diagram:
 
         elif self.state == "ask_price_range":
             if dialog_act == "inform":
-                self.preferences_dict["pricerange"] = user_input
+                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+                self.preferences_dict["pricerange"] = extracted_preferences.get("pricerange", None)
                 self.state = "ask_preferences"
                 self.is_state = False
             else:
@@ -112,6 +119,11 @@ class State_diagram:
         elif self.state == "suggest_restaurant":
             print("System: I will now suggest a restaurant.")
             self.state = "endstate"
+        
+        else:
+            print('big mistake')
+            print(self.state)
+            print(self.dialog_act)
 
 
     def run(self, model, vectorizer):        
