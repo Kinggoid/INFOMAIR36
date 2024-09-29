@@ -3,6 +3,8 @@ This is the group logbook. Write here what you have been working on.
 
 13-9-2024 Jennifer -- Added Majority class classifier (with Oliver) and the Keyword Matching classifier (rules still have to be added for improvement). 2h work.
 
+16-9-2024 -- Amir, Jennifer and Oliver worked on finishing the project together for like 3 hours
+
 14-09-2-24 Thijme -- half an hour. looking at what code was made and tried to understand it
 
 16-9-2024 Amir, -- worked on making the merging of all our codes work in order to hand it in. 4h work
@@ -11,6 +13,7 @@ This is the group logbook. Write here what you have been working on.
 
 19-9-2024, Amir -- worked on fixing further bugs in the baseline models and trying to make a start on 1b. 2-3h work.
 
+<<<<<<< HEAD
 23-9-2024 Thijme -- 17:00 - 21:30 coderen
 23-9-2024, Amir -- worked on 1b after school and spent some time also trying to fix the last bugs before handing it in: 6h work
 23-9-2024, Oliver -- worked on state diagram: 4 hrs
@@ -23,3 +26,11 @@ This is the group logbook. Write here what you have been working on.
 
 28-9-2024 Oliver -- looked at code and other examples to prepare remodelling of 1b - 1hr 
 28-9-2024 Oliver -- created report word doc with heading and outlines - 0.5hr
+=======
+23-9-2024 Thijme, Amir and Jennifer worked on project together again for hours (express preferences)
+
+20/9/2024 Jennifer -- uurtje aan startup/outline 1b gewerkt
+24/25-9-2024 Jennifer -- finished lookup function and extract preference functions, 3h work. (also helped monday working together with Amir and Thijme)
+26-9-2024 Jennifer -- improven schema met Thijme en logica regels voor express preferences afronden, again een paar uurtjes
+27-9-2024 Jennifer -- in ochtend met thijme gebeld voor een uurtje en geprobeerd logica regels te verzinnen, daarna nog verder gewerkt om eindelijk eindelijk die lookup en extract preferences helemaal af te hebben (2.5u)
+>>>>>>> Jennifer

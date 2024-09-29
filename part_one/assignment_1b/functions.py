@@ -35,7 +35,7 @@ def Levenshtein_matching(word: str, options: list, threshold: int = 3) -> str:
     return None  # No match with word from db
 
 
-def extract_preferences(user_utterence_input):
+def extract_preferences(user_utterence_input, unique_areas, unique_pricerange, unique_cuisine) -> dict:
     """
     Functions to look for keywords that represents a type of cuisine, a location or a
     price range. Outputs a dictionary with the extracted information.
@@ -56,12 +56,6 @@ def extract_preferences(user_utterence_input):
                         "cuisine": "empty",
                         "pricerange": "empty"}
 
-    # Save all the options for typefood, area and location
-    df = pd.read_csv('part_one\\restaurant_info.csv')
-    db_pricerange = set(df['pricerange'].dropna().str.lower())
-    db_areas = set(df['area'].dropna().str.lower())
-    db_cuisine = set(df['food'].dropna().str.lower())
-
     # Predefined 'dontcare' signaling words + area/food/price specification words
     dontcare_signal = {'any', 'whatever', "dontcare"}
     location_signal = {"area", "location", "part", "place", "town"}
@@ -73,11 +67,11 @@ def extract_preferences(user_utterence_input):
 
         # TO-DO: what to do with 'world'/ 'Swedish'
         # Keyword matching
-        if word in db_cuisine:
+        if word in unique_cuisine:
             preferences_dict["cuisine"] = word
-        elif word in db_areas:
+        elif word in unique_areas:
             preferences_dict["location"] = word
-        elif word in db_pricerange:
+        elif word in unique_pricerange:
             preferences_dict["pricerange"] = word
         
         # Check for 'dontcare' preference value
@@ -95,21 +89,22 @@ def extract_preferences(user_utterence_input):
             else:
                 preferences_dict["undefined_context"] = 'dontcare'
 
+
         # If no exact match, check for closest match
         elif word != 'want':        # TO-DO: 'part'/'want' turns into 'east'or 'west' with Levenshtein
-            closest_match = Levenshtein_matching(word.lower(), db_cuisine)
+            closest_match = Levenshtein_matching(word.lower(), unique_cuisine)
             if closest_match:
                 print(word, closest_match)
                 preferences_dict["cuisine"] = closest_match
                 continue 
 
-            closest_match = Levenshtein_matching(word.lower(), db_areas)
+            closest_match = Levenshtein_matching(word.lower(), unique_areas)
             if closest_match:
                 print(word, closest_match)
                 preferences_dict["location"] = closest_match
                 continue
 
-            closest_match = Levenshtein_matching(word.lower(), db_pricerange)
+            closest_match = Levenshtein_matching(word.lower(), unique_pricerange)
             if closest_match:
                 print(word, closest_match)
                 preferences_dict["pricerange"] = closest_match
