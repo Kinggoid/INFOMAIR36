@@ -120,6 +120,7 @@ def extract_preferences(user_utterence_input):
 
 # Function to retrieve restaurant suggestions from CSV file -----------------------------
 def lookup(preferences):
+
     """
     Function that takes the preference dictionary (stating cuisine, area and pricerange
     preferences) and loops through the restaurant_info.csv file to find possible restaurants.
@@ -146,3 +147,30 @@ def lookup(preferences):
     list_of_possible_restaurants = df["restaurantname"].tolist()
 
     return list_of_possible_restaurants
+
+# Function to filter restaurants based on criteria
+def filter_restaurants(restaurants_df, food_type=None, price_range=None, area=None):
+    filtered_df = restaurants_df
+
+    if food_type:
+        filtered_df = filtered_df[filtered_df['food'].str.contains(food_type, case=False, na=False)]
+
+    if price_range:
+        filtered_df = filtered_df[filtered_df['pricerange'].str.contains(price_range, case=False, na=False)]
+
+    if area:
+        filtered_df = filtered_df[filtered_df['area'].str.contains(area, case=False, na=False)]
+
+    return filtered_df
+
+# Function to recommend a restaurant
+def recommend_restaurant(restaurants_df, food_type=None, price_range=None, area=None):
+    filtered_restaurants = filter_restaurants(restaurants_df, food_type, price_range, area)
+
+    if filtered_restaurants.empty:
+        return "I am sorry, but there are no restaurants matching your criteria.", None
+
+    recommendation = filtered_restaurants.sample(n=1).iloc[0]
+    remaining_restaurants = filtered_restaurants.drop(recommendation.name)
+
+    return recommendation, remaining_restaurants
