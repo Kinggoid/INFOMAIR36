@@ -119,7 +119,7 @@ def extract_preferences(user_utterence_input):
 
 
 # Function to retrieve restaurant suggestions from CSV file -----------------------------
-def lookup(preferences):
+def lookup(food, pricerange, area):
 
     """
     Function that takes the preference dictionary (stating cuisine, area and pricerange
@@ -128,18 +128,18 @@ def lookup(preferences):
     """
 
     # Read CSV
-    df = pd.read_csv('part_one\\restaurant_info.csv')
+    df = pd.read_csv('part_one/data/restaurant_info.csv')
     list_of_possible_restaurants = []
 
     # Filter restaurants by food, area and pricerange
-    if preferences["cuisine"] != "dontcare":
-        df = df[df["food"].str.lower() == preferences["cuisine"]]
+    if food != "dontcare":
+        df = df[df["food"].str.lower() == food]
 
-    if preferences["location"] != "dontcare":
-        df = df[df["area"].str.lower() == preferences["location"]]
+    if area != "dontcare":
+        df = df[df["area"].str.lower() == area]
 
-    if preferences["pricerange"] != "dontcare":
-        df = df[df["pricerange"].str.lower() == preferences["pricerange"]]
+    if pricerange != "dontcare":
+        df = df[df["pricerange"].str.lower() == pricerange]
 
     # NOTE: dealt nog niet met 'empty', ergens anders wann 'dontcare' veranderen in dict
 
@@ -148,29 +148,12 @@ def lookup(preferences):
 
     return list_of_possible_restaurants
 
-# Function to filter restaurants based on criteria
-def filter_restaurants(restaurants_df, food_type=None, price_range=None, area=None):
-    filtered_df = restaurants_df
-
-    if food_type:
-        filtered_df = filtered_df[filtered_df['food'].str.contains(food_type, case=False, na=False)]
-
-    if price_range:
-        filtered_df = filtered_df[filtered_df['pricerange'].str.contains(price_range, case=False, na=False)]
-
-    if area:
-        filtered_df = filtered_df[filtered_df['area'].str.contains(area, case=False, na=False)]
-
-    return filtered_df
 
 # Function to recommend a restaurant
-def recommend_restaurant(restaurants_df, food_type=None, price_range=None, area=None):
-    filtered_restaurants = filter_restaurants(restaurants_df, food_type, price_range, area)
+def recommend_restaurant(food, pricerange, area):
+    filtered_restaurants = lookup(food, pricerange, area)
 
     if filtered_restaurants.empty:
         return "I am sorry, but there are no restaurants matching your criteria.", None
-
-    recommendation = filtered_restaurants.sample(n=1).iloc[0]
-    remaining_restaurants = filtered_restaurants.drop(recommendation.name)
-
-    return recommendation, remaining_restaurants
+    else:
+        return filtered_restaurants
