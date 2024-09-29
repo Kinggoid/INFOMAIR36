@@ -5,11 +5,25 @@ import pandas as pd
 import Levenshtein
 
 ########## not worked out yet ##############
-class state_diagram:
+class State_diagram:
     def __init__(self, states):
         self.area = None
         self.food = None
         self.price = None
+        self.states = states
+    
+    def add_state(self, state):
+        self.states.append(state)
+    
+    def get_state(self, state_name):
+        for state in self.states:
+            if state.name == state_name:
+                return state
+        return None
+    
+    def get_next_state(self, current_state, input):
+        return self.get_state(current_state).next_state(input)
+    
 
 
 class State:
@@ -173,36 +187,8 @@ def lookup(preferences):
     return list_of_possible_restaurants
 
 
-# Example dialog simulation -------------------------------------------------------------
-def state_transition_function(initial_state, user_input, dialog_act):
-    #show current state
-    current_state = initial_state
-    print(f"Current state: {current_state.name}")
-    print(f"System: {current_state.message}")
-
-    #only assign preference_dict if its an INFORM act
-    if dialog_act == "INFORM":
-        preference_dict = extract_preferences(user_input)
-
-    #logic for state transitions
-    if current_state == welcome_state:      # Go to ask_area state if you do not know where the user wants to eat
-        if dialog_act == "INFORM":
-            if preference_dict[0] == "empty":
-               current_state = ask_area_state
-               return ask_area_state
-    elif current_state == ask_area_state:   # Go to ask_food_state if you do not know what food the user wants to eat
-        if dialog_act == "INFORM":
-            if preference_dict[1] == "empty":
-                current_state == ask_food_state
-                return current_state
-    elif current_state == ask_food_state:   # Go to ask_price state if you do not know what price the user wants to pay
-        if dialog_act == "INFORM":
-            if preference_dict[2] == "empty":
-                current_state == ask_price_state
-                return current_state
-
-
-
+def for_now():
+    pass
 
 
 def main():
@@ -223,6 +209,29 @@ def main():
     suggest_restaurant_state = State("Suggest_restaurant", "VAR is a nice restaurant to eat at")
     give_info_state = State("Give_info", "The info for this restaurant is VAR")
     end_state = State("End", "The conversation has ended.")
+
+    # Add transitions
+    welcome_state.add_transition("inform", ask_area_state)
+    welcome_state.add_transition("null", ask_area_state)
+    welcome_state.add_text("Welkom, ga verder")
+
+    ask_area_state.add_transition("infomr", ask_food_state)
+
+    ask_food_state.add_transition("INFORM", ask_price_state)
+
+    ask_price_state.add_transition("INFORM", double_check_state)
+
+    double_check_state.add_transition("CONFIRM", suggest_restaurant_state)
+
+    double_check_state.add_transition("DENY", no_match_state)
+
+    suggest_restaurant_state.add_transition("INFORM", give_info_state)
+    suggest_restaurant_state.add_text()
+
+    give_info_state.add_transition("INFORM", end_state)
+
+    # Add state diagram
+    state_diagram = State_diagram()
 
     #welcoming user 
     print(f"Current state: {welcome_state.name}")
@@ -247,6 +256,43 @@ def main():
         print(f"System: {current_state.message}")
 
 
-
-
 main()
+
+
+
+
+# Example dialog simulation -------------------------------------------------------------
+def state_transition_function(initial_state, user_input, dialog_act):
+    #show current state
+    current_state = initial_state
+    print(f"Current state: {current_state.name}")
+    print(f"System: {current_state.message}")
+
+    #only assign preference_dict if its an INFORM act
+    if dialog_act == "INFORM":
+        preference_dict = extract_preferences(user_input)
+
+    #logic for state transitions
+    if current_state == welcome_state:      # Go to ask_area state if you do not know where the user wants to eat
+        if dialog_act == "INFORM":
+            # extract preferences
+            # save / overwrite preferences
+            # go next state
+
+
+
+
+            if preference_dict[0] == "empty":
+               
+               current_state = ask_area_state
+               return ask_area_state
+    elif current_state == ask_area_state:   # Go to ask_food_state if you do not know what food the user wants to eat
+        if dialog_act == "INFORM":
+            if preference_dict[1] == "empty":
+                current_state == ask_food_state
+                return current_state
+    elif current_state == ask_food_state:   # Go to ask_price state if you do not know what price the user wants to pay
+        if dialog_act == "INFORM":
+            if preference_dict[2] == "empty":
+                current_state == ask_price_state
+                return current_state
