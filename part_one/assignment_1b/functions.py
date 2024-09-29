@@ -119,7 +119,8 @@ def extract_preferences(user_utterence_input):
 
 
 # Function to retrieve restaurant suggestions from CSV file -----------------------------
-def lookup(preferences):
+def lookup(food, pricerange, area):
+
     """
     Function that takes the preference dictionary (stating cuisine, area and pricerange
     preferences) and loops through the restaurant_info.csv file to find possible restaurants.
@@ -127,18 +128,18 @@ def lookup(preferences):
     """
 
     # Read CSV
-    df = pd.read_csv('part_one\\restaurant_info.csv')
+    df = pd.read_csv('part_one/data/restaurant_info.csv')
     list_of_possible_restaurants = []
 
     # Filter restaurants by food, area and pricerange
-    if preferences["cuisine"] != "dontcare":
-        df = df[df["food"].str.lower() == preferences["cuisine"]]
+    if food != "dontcare":
+        df = df[df["food"].str.lower() == food]
 
-    if preferences["location"] != "dontcare":
-        df = df[df["area"].str.lower() == preferences["location"]]
+    if area != "dontcare":
+        df = df[df["area"].str.lower() == area]
 
-    if preferences["pricerange"] != "dontcare":
-        df = df[df["pricerange"].str.lower() == preferences["pricerange"]]
+    if pricerange != "dontcare":
+        df = df[df["pricerange"].str.lower() == pricerange]
 
     # NOTE: dealt nog niet met 'empty', ergens anders wann 'dontcare' veranderen in dict
 
@@ -146,3 +147,13 @@ def lookup(preferences):
     list_of_possible_restaurants = df["restaurantname"].tolist()
 
     return list_of_possible_restaurants
+
+
+# Function to recommend a restaurant
+def recommend_restaurant(food, pricerange, area):
+    filtered_restaurants = lookup(food, pricerange, area)
+
+    if filtered_restaurants.empty:
+        return "I am sorry, but there are no restaurants matching your criteria.", None
+    else:
+        return filtered_restaurants
