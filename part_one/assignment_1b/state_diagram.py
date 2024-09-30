@@ -24,7 +24,7 @@ class State_diagram:
         
     
     def state_transition_function(self, user_input = None):
-        if self.dialog_act == "thankyou" or self.dialog_act == "bye":
+        if self.dialog_act == "bye":
             print("System: You are welcome. Have a nice day!")
             self.state = "endstate"
             
@@ -33,7 +33,7 @@ class State_diagram:
                 self.state = "ask_preferences"
                 self.is_state = False
             else:
-                print("System: I am sorry, I did not understand that. Please provide me with more information.")
+                print("System: Hello , welcome to the Cambridge restaurant system? You can ask for restaurants by area , price range or food type . How may I help you?")
 
         elif self.state == "ask_preferences":
             # Extract new preferences
@@ -48,11 +48,14 @@ class State_diagram:
 
             self.available_restaurants = lookup(self.restaurant_df, self.preferences_dict)
             if self.available_restaurants.empty:
-                print(f"System: I am sorry, there are no restaurants with those preferences. Please provide me with different preferences.")
+                print(f"System: I am sorry, there are no restaurants with those preferences: "
+                    f"Area: {self.preferences_dict['area']}, "
+                    f"Food Type: {self.preferences_dict['food type']}, "
+                    f"Price Range: {self.preferences_dict['pricerange']}. "
+                    "Please provide me with different preferences.")
                 self.state = "preference_doesnt_exist"
+
             elif not missing_preferences:
-                print("System: I have all the information I need. I will now suggest a restaurant.")
-                
                 # Suggest the first restaurant from the filtered DataFrame
                 suggested_restaurant = self.available_restaurants.iloc[0]
                 
@@ -86,7 +89,7 @@ class State_diagram:
                 self.state = "ask_preferences"
                 self.is_state = False
             else:
-                print("System: I am sorry, I did not understand that. Please provide me with more information about your preferences.")
+                print("System: I am sorry, I did not understand that. Please tell me the area where you'd like to eat.")
 
 
         elif self.state == "ask_food_type":
@@ -96,7 +99,7 @@ class State_diagram:
                 self.state = "ask_preferences"
                 self.is_state = False
             else:
-                print("System: I am sorry, I did not understand that. Please provide me with more information.")
+                print("System: I am sorry, I did not understand that. Please tell me what kind of food you'd like to eat.")
         
 
         elif self.state == "ask_price_range":
@@ -106,7 +109,7 @@ class State_diagram:
                 self.state = "ask_preferences"
                 self.is_state = False
             else:
-                print("System: I am sorry, I did not understand that. Please provide me with more information.")
+                print("System: I am sorry, I did not understand that. Please tell me the price range you are looking for.")
         
 
         elif self.state == "preference_doesnt_exist":
@@ -120,18 +123,29 @@ class State_diagram:
                 self.is_state = False
             
             elif self.dialog_act == "inform":
-                print("System: What more information would you like to know?")
                 self.state = "ask_preferences"
                 self.is_state = False
             
             elif self.dialog_act == "reqalts":
                 if len(self.available_restaurants) > 1:
                     self.available_restaurants = self.available_restaurants.iloc[1:]
+                    # Suggest the first restaurant from the filtered DataFrame
+                    suggested_restaurant = self.available_restaurants.iloc[0]
                     
+                    # Extract details of the suggested restaurant
+                    restaurant_name = suggested_restaurant['restaurantname']
+                    restaurant_food = suggested_restaurant['food']
+                    restaurant_area = suggested_restaurant['area']
+                    restaurant_pricerange = suggested_restaurant['pricerange']
+                    
+                    # Print the suggestion
+                    print(f"System: I suggest {restaurant_name}. It serves {restaurant_food} food in the {restaurant_area} area and falls within the {restaurant_pricerange} price range.")
+                    self.state = "suggest_restaurant"
+
                 else:
                     print("System: I'm sorry, there are no more restaurants to suggest.")
-                self.state = "ask_preferences"
-                self.is_state = False    
+                    self.state = "ask_preferences"
+                    self.is_state = False    
                 
             
         elif self.state == "give_info":
@@ -167,52 +181,13 @@ class State_diagram:
         user_input = None
         
         while self.state != "endstate":
-            print('--------------------------------')
-            print(self.state)
             if self.is_state:
                 user_input = input("You: ").lower()
                 vectorized_user_input = vectorizer.transform([user_input])
 
                 #classifying user input using ML model
                 self.dialog_act = model.predict(vectorized_user_input)
-                print(self.dialog_act)
                 self.state_transition_function(user_input)
 
             else:
                 self.state_transition_function(user_input=user_input)
-
-
-
-    #   elif self.state == "ask_food":
-    #         self.food_type = user_input
-    #         self.state = "ask_price"
-    #         print("System: What type of price range are you looking for?")
-
-    #     elif self.state == "ask_price":
-    #         self.price_range = user_input
-    #         self.state = "double_check"
-    #         print(f"System: So you want to eat at {self.area} place?")
-
-    #     elif self.state == "double_check":
-    #         if user_input == "yes":
-    #             self.state = "suggest_restaurant"
-    #             print(f"System: {self.restaurant} is a nice restaurant to eat at")
-    #         else:
-    #             self.state = "no_match"
-    #             print("System: Sorry, such a restaurant does not exist")
-
-    #     elif self.state == "suggest_restaurant":
-    #         self.state = "give_info"
-    #         print(f"System: The info for this restaurant is {self.other_options}")
-
-    #     elif self.state == "give_info":
-    #         self.state = "endstate"
-    #         print("System: The conversation has ended.")
-
-    #     elif self.state == "no_match":
-    #         self.state = "endstate"
-    #         print("System: The conversation has ended.")
-
-    #     else:
-    #         self.state = "endstate"
-    #         print("System: The conversation has ended.")
