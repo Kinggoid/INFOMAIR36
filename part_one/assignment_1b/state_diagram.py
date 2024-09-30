@@ -9,8 +9,6 @@ class State_diagram:
         self.food_type = None
         self.price_range = None
         self.is_state = True
-        self.restaurant = None
-        self.other_options = None
         self.preferences_dict = {"area": None,
                         "food type": None,
                         "pricerange": None}
@@ -19,9 +17,12 @@ class State_diagram:
         self.unique_pricerange = set(self.restaurant_df['pricerange'].dropna().str.lower())
         self.unique_areas = set(self.restaurant_df['area'].dropna().str.lower())
         self.unique_foodtype = set(self.restaurant_df['food'].dropna().str.lower())
+
+        self.prefences_exists = False
+        self.available_restaurants = None
         
 
-    def preferences_incorrect(self):
+    def preferences_incorrect0(self):
         unique_sets = {
             "pricerange": self.unique_pricerange,
             "area": self.unique_areas,
@@ -33,6 +34,37 @@ class State_diagram:
                 if key != None:
                     return key
         return False
+    
+    def find_available_restaurants(self):
+        """
+        Filter the DataFrame based on the preferences and return the filtered DataFrame.
+        """
+        # Start with the full DataFrame
+        filtered_df = self.restaurant_df
+
+        # Apply filters based on preferences
+        if self.preferences_dict["pricerange"] is not None:
+            filtered_df = filtered_df[filtered_df["pricerange"].str.lower() == self.preferences_dict["pricerange"].lower()]
+        
+        if self.preferences_dict["area"] is not None:
+            filtered_df = filtered_df[filtered_df["area"].str.lower() == self.preferences_dict["area"].lower()]
+        
+        if self.preferences_dict["food type"] is not None:
+            filtered_df = filtered_df[filtered_df["food"].str.lower() == self.preferences_dict["food type"].lower()]
+
+        self.available_restaurants = filtered_df
+
+    def preferences_incorrect(self):
+        """
+        Check if there are any matching restaurants based on the preferences.
+        """
+        self.find_available_restaurants()
+
+        # Check if any rows remain
+        if self.available_restaurants.empty:
+            return True  # No matching restaurants found
+        else:
+            return False  # At least one matching restaurant found
 
 
     def state_transition_function(self, user_input = None, dialog_act = None):
@@ -45,41 +77,57 @@ class State_diagram:
 
 
         elif self.state == "ask_preferences":
-            # self.preferences_dict = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
-            self.preferences_dict = self.preferences_dict = {"area": None,
-                        "food type": "chinese",
-                        "pricerange": None}
+            # Extract new preferences
+            new_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+
+            # Update the existing preferences_dict
+            for key, value in new_preferences.items():
+                if value != None:
+                    self.preferences_dict[key] = value
             
             missing_preferences = [pref for pref, value in self.preferences_dict.items() if value is None]
 
-            # prefences_exists = self.preferences_incorrect()
-            prefences_exists = False
+            self.prefences_exists = self.preferences_incorrect()
+            # prefences_exists = False
+            print(self.preferences_dict)
+            print(self.preferences_incorrect())
 
-            if prefences_exists:
-                print(f"System: I am sorry, {prefences_exists} is not a valid preference. Please provide me with a valid preference.")
+            if self.prefences_exists:
+                print(f"System: I am sorry, {self.prefences_exists} is not a valid preference. Please provide me with a valid preference.")
                 self.state = "preference_doesnt_exist"
             elif not missing_preferences:
                 print("System: I have all the information I need. I will now suggest a restaurant.")
+                
+                # Suggest the first restaurant from the filtered DataFrame
+                suggested_restaurant = self.available_restaurants.iloc[0]
+                
+                # Extract details of the suggested restaurant
+                restaurant_name = suggested_restaurant['name']
+                restaurant_food = suggested_restaurant['food']
+                restaurant_area = suggested_restaurant['area']
+                restaurant_pricerange = suggested_restaurant['pricerange']
+                
+                # Print the suggestion
+                print(f"I suggest {restaurant_name}. It serves {restaurant_food} food in the {restaurant_area} area and falls within the {restaurant_pricerange} price range.")
                 self.state = "suggest_restaurant"
             elif "area" in missing_preferences:
                 print("System: In what area would you like to eat?")
                 self.state = "ask_area"
-            elif "food_type" in missing_preferences:
+            elif "food type" in missing_preferences:
                 print("System: What type of food are you looking for?")	
                 self.state = "ask_food_type"
-            elif "price_range" in missing_preferences:
+            elif "pricerange" in missing_preferences:
                 print("System: What type of price range are you looking for?")
                 self.state = "ask_price_range"
             else:
-                print('ya donkey')
-            print('hi')
+                print('For testing. If you read this, something went wrong')
             self.is_state = True
 
 
         elif self.state == "ask_area":
             if dialog_act == "inform":
-                
-                self.preferences_dict["area"] = user_input
+                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+                self.preferences_dict["area"] = extracted_preferences.get("area", None)
                 self.state = "ask_preferences"
                 self.is_state = False
             else:
@@ -88,7 +136,8 @@ class State_diagram:
 
         elif self.state == "ask_food_type":
             if dialog_act == "inform":
-                self.preferences_dict["food type"] = user_input
+                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+                self.preferences_dict["food type"] = extracted_preferences.get("food type", None)
                 self.state = "ask_preferences"
                 self.is_state = False
             else:
@@ -97,7 +146,8 @@ class State_diagram:
 
         elif self.state == "ask_price_range":
             if dialog_act == "inform":
-                self.preferences_dict["pricerange"] = user_input
+                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+                self.preferences_dict["pricerange"] = extracted_preferences.get("pricerange", None)
                 self.state = "ask_preferences"
                 self.is_state = False
             else:
@@ -105,13 +155,38 @@ class State_diagram:
         
 
         elif self.state == "preference_doesnt_exist":
-            print(f"System: I am sorry, {prefences_exists} is not a valid preference. Please provide me with a valid preference.")
+            print(f"System: I am sorry, {self.prefences_exists} is not a valid preference. Please provide me with a valid preference.")
             self.state = "ask_preferences"
             self.is_state = False
         
         elif self.state == "suggest_restaurant":
-            print("System: I will now suggest a restaurant.")
-            self.state = "endstate"
+            if dialog_act == "request":
+                self.state = "give_info"
+                self.is_state == True
+
+            elif dialog_act == "thankyou" or dialog_act == "bye":
+                print("System: You are welcome. Have a nice day!")
+                self.state = "endstate"
+
+        elif self.state == "give_info":
+            if dialog_act == "request":
+                if "phone" in user_input:
+                    print(f"System: The phone number for this restaurant is {self.available_restaurants[0]['phone']}")
+                if "address" in user_input:
+                    print(f"System: The address for this restaurant is {self.available_restaurants[0]['addr']}")
+                if "postcode" in user_input:
+                    print(f"System: The postcode for this restaurant is {self.available_restaurants[0]["postcode"]}")
+
+            elif dialog_act == "inform":
+                print("System: What more information would you like to know?")
+            elif dialog_act == "thankyou" or dialog_act == "bye":
+                print("System: You are welcome. Have a nice day!")
+                self.state = "endstate"
+
+        else:
+            print('big mistake')
+            print(self.state)
+            print(self.dialog_act)
 
 
     def run(self, model, vectorizer):        
