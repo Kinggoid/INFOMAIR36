@@ -77,7 +77,6 @@ def extract_preferences(user_utterence_input, unique_areas, unique_foodtype, uni
         elif word in dontcare_signal:
             # Match with preference context
             window = words[max(0, i - 3):i + 3]
-            print(window)
 
             if any(kw in window for kw in location_signal):
                 preferences_dict["area"] = 'dontcare'
@@ -92,19 +91,16 @@ def extract_preferences(user_utterence_input, unique_areas, unique_foodtype, uni
         elif word != 'want':        # TO-DO: 'part'/'want' turns into 'east'or 'west' with Levenshtein
             closest_match = Levenshtein_matching(word.lower(), unique_foodtype)
             if closest_match:
-                print(word, closest_match)
                 preferences_dict["food type"] = closest_match
                 continue 
 
             closest_match = Levenshtein_matching(word.lower(), unique_areas)
             if closest_match:
-                print(word, closest_match)
                 preferences_dict["area"] = closest_match
                 continue
 
             closest_match = Levenshtein_matching(word.lower(), unique_pricerange)
             if closest_match:
-                print(word, closest_match)
                 preferences_dict["pricerange"] = closest_match
                 continue
         
