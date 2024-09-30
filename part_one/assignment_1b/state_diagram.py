@@ -47,7 +47,6 @@ class State_diagram:
             missing_preferences = [pref for pref, value in self.preferences_dict.items() if value is None]
 
             self.available_restaurants = lookup(self.restaurant_df, self.preferences_dict)
-
             if self.available_restaurants.empty:
                 print(f"System: I am sorry, there are no restaurants with those preferences. Please provide me with different preferences.")
                 self.state = "preference_doesnt_exist"
@@ -120,17 +119,21 @@ class State_diagram:
                 self.state = "give_info"
                 self.is_state = False
             
+            elif self.dialog_act == "inform":
+                print("System: What more information would you like to know?")
+                self.state = "ask_preferences"
+                self.is_state = False
+            
             elif self.dialog_act == "reqalts":
                 if len(self.available_restaurants) > 1:
                     self.available_restaurants = self.available_restaurants.iloc[1:]
+                    
                 else:
-                    print("System: I'm sorry, there are no more restaurants to suggest. Would you like to change preferences?")
-                
+                    print("System: I'm sorry, there are no more restaurants to suggest.")
                 self.state = "ask_preferences"
                 self.is_state = False    
                 
-                
-
+            
         elif self.state == "give_info":
             if self.dialog_act == "request":
                 restaurant_info = self.available_restaurants.iloc[0]
@@ -164,12 +167,15 @@ class State_diagram:
         user_input = None
         
         while self.state != "endstate":
+            print('--------------------------------')
+            print(self.state)
             if self.is_state:
                 user_input = input("You: ").lower()
                 vectorized_user_input = vectorizer.transform([user_input])
 
                 #classifying user input using ML model
                 self.dialog_act = model.predict(vectorized_user_input)
+                print(self.dialog_act)
                 self.state_transition_function(user_input)
 
             else:

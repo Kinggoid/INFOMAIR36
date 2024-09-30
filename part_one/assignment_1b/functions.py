@@ -1,16 +1,14 @@
 import random
 import re
 import pandas as pd
-from Levenshtein import distance as Levenshtein
-
+from Levenshtein import distance as levenshtein_distance
 
 def Levenshtein_matching(word, options):
-
     closest_matches = []
     for option in options:
-        distance = Levenshtein.distance(word, option)
-        if distance < 3:
-            closest_matches.append((option, distance))
+        dist = levenshtein_distance(word, option)
+        if dist < 3:
+            closest_matches.append((option, dist))
     
     if closest_matches:
         min_distance = min(closest_matches, key=lambda x: x[1])[1]
@@ -20,7 +18,7 @@ def Levenshtein_matching(word, options):
     return None # No match with word from db
 
 
-def extract_preferences(user_utterence_input):
+def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerange):
     """
     Functions to look for keywords that represents a type of cuisine, a location or a
     price range. Outputs a dictionary with the extracted information.
@@ -60,15 +58,9 @@ def extract_preferences(user_utterence_input):
     words = [word.lower() for word in words if word.lower() not in stopwords]
     print(words)
 
-    preferences_dict = {"cuisine": "empty",
-                        "location": "empty",
-                        "pricerange": "empty"}
-
-    # Save all the options for typefood, area and location
-    df = pd.read_csv('part_one\\restaurant_info.csv')
-    db_pricerange = set(df['pricerange'].dropna().str.lower())
-    db_areas = set(df['area'].dropna().str.lower())
-    db_cuisine = set(df['food'].dropna().str.lower())
+    preferences_dict = {"food type": None,
+                        "area": None,
+                        "pricerange": None}
 
     # Predefined 'dontcare' signaling words + area/food/price specification words
     dontcare_signal = {'any', 'whatever', "dontcare", "doesntmatter", "anywhere", "rest"}
@@ -81,9 +73,9 @@ def extract_preferences(user_utterence_input):
 
         # Keyword matching
         if word in db_cuisine:
-            preferences_dict["cuisine"] = word
+            preferences_dict["food type"] = word
         elif word in db_areas:
-            preferences_dict["location"] = word
+            preferences_dict["area"] = word
         elif word in db_pricerange:
             preferences_dict["pricerange"] = word
         
@@ -94,9 +86,9 @@ def extract_preferences(user_utterence_input):
             print(window)
 
             if any(kw in window for kw in location_signal):
-                preferences_dict["location"] = 'dontcare'
+                preferences_dict["area"] = 'dontcare'
             elif any(kw in window for kw in cuisine_signal):
-                preferences_dict["cuisine"] = 'dontcare'
+                preferences_dict["food type"] = 'dontcare'
             elif any(kw in window for kw in pricerange_signal):
                 preferences_dict["pricerange"] = 'dontcare'
             else:
@@ -107,75 +99,54 @@ def extract_preferences(user_utterence_input):
             closest_match = Levenshtein_matching(word.lower(), db_cuisine)
             if closest_match:
                 print(word, closest_match)
-                if preferences_dict["cuisine"] == "empty": # Only fill up when no other value saved: 'west part of town'
-                    preferences_dict["cuisine"] = closest_match
+                if preferences_dict["food type"] == None: # Only fill up when no other value saved: 'west part of town'
+                    preferences_dict["food type"] = closest_match
                     continue 
 
             closest_match = Levenshtein_matching(word.lower(), db_areas)
             if closest_match:
                 print(word, closest_match)
-                if preferences_dict["location"] == "empty":
-                    preferences_dict["location"] = closest_match
+                if preferences_dict["area"] == None:
+                    preferences_dict["area"] = closest_match
                     continue
 
             closest_match = Levenshtein_matching(word.lower(), db_pricerange)
             if closest_match:
                 print(word, closest_match)
-                if preferences_dict["pricerange"] == "empty":
+                if preferences_dict["pricerange"] == None:
                     preferences_dict["pricerange"] = closest_match
                     continue
 
         # Final check: possible unrecognized foodtype preference missed?
-        elif word == 'food' and preferences_dict["cuisine"] == "empty":
+        elif word == 'food' and preferences_dict["food type"] == None:
             
             # Option 1: "serving"/"for" + preference + "food"
             if i - 2 > 0 and (words[i-2].startswith("serv") or words[i-2] == "for"):
-                preferences_dict["cuisine"] = words[i-1]
+                preferences_dict["food type"] = words[i-1]
 
             # Option 2: nationality ending with -ish or -an + "food"
             elif i-1 > 0 and (words[i-1].endswith("ish") or words[i-1].endswith("an")):
-                preferences_dict["cuisine"] = words[i-1]
+                preferences_dict["food type"] = words[i-1]
 
     return preferences_dict
 
 
 
-# Function to retrieve restaurant suggestions from CSV file -----------------------------
-def lookup(food, pricerange, area):
-
+def lookup(restaurant_df, preferences_dict):
     """
-    Function that takes the preference dictionary (stating cuisine, area and pricerange
-    preferences) and loops through the restaurant_info.csv file to find possible restaurants.
-    These names are saved in a list and given as output.
+    Filter the DataFrame based on the preferences and return the filtered DataFrame.
     """
 
-    # Read CSV
-    df = pd.read_csv('part_one/data/restaurant_info.csv')
-    list_of_possible_restaurants = []
+    # Apply filters based on preferences
+    if preferences_dict["pricerange"] is not None:
+        restaurant_df = restaurant_df[restaurant_df["pricerange"].str.lower() == preferences_dict["pricerange"].lower()]
+    
+    if preferences_dict["area"] is not None:
+        restaurant_df = restaurant_df[restaurant_df["area"].str.lower() == preferences_dict["area"].lower()]
+    
+    if preferences_dict["food type"] is not None:
+        restaurant_df = restaurant_df[restaurant_df["food"].str.lower() == preferences_dict["food type"].lower()]
 
-    # Filter restaurants by food, area and pricerange
-    if food != "dontcare":
-        df = df[df["food"].str.lower() == food]
-
-    if area != "dontcare":
-        df = df[df["area"].str.lower() == area]
-
-    if pricerange != "dontcare":
-        df = df[df["pricerange"].str.lower() == pricerange]
-
-    # NOTE: dealt nog niet met 'empty', ergens anders wann 'dontcare' veranderen in dict
-
-    # Save names to list
-    list_of_possible_restaurants = df["restaurantname"].tolist()
-
-    return list_of_possible_restaurants
+    return restaurant_df
 
 
-# Function to recommend a restaurant
-def recommend_restaurant(food, pricerange, area):
-    filtered_restaurants = lookup(food, pricerange, area)
-
-    if filtered_restaurants.empty:
-        return "I am sorry, but there are no restaurants matching your criteria.", None
-    else:
-        return filtered_restaurants
