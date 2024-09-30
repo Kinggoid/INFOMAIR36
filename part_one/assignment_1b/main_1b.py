@@ -1,11 +1,11 @@
+import sys
+import os
 import pickle
 from state_diagram import State_diagram
 from functions import *
-import pickle
 
 
 def main():
-    # Load the trained logistic regression model
     with open(r'part_one/trained_models/lr_model.pkl', 'rb') as f:
         model = pickle.load(f)
     

@@ -2,38 +2,41 @@
 class KeywordMatchingModel():
     def __init__(self, input):
         self.input = input
+        self.classification = self._classify(input)
 
-        self.classification = []
-
+    def _classify(self, input):
+        classification = []
         for i in range(len(input)):
             utterance = ' '.join(input[i])  # Join the words in each utterance into a string
             
+            print(utterance)
             if "thank" in utterance:
-                self.classification.append("thankyou")
+                classification.append("thankyou")
             elif "bye" in utterance:
-                self.classification.append("bye")
+                classification.append("bye")
             elif "hi " in utterance or "hello" in utterance or "helo " in utterance:
-                self.classification.append("hello")
+                classification.append("hello")
             elif "what" in utterance or "phone" in utterance or "address" in utterance:
-                self.classification.append("request")
+                classification.append("request")
             elif "yes" in utterance or "right" in utterance or "yeah" in utterance:
-                self.classification.append("affirm")
+                classification.append("affirm")
             elif "no" in utterance or "nope" in utterance:
-                self.classification.append("negate")
+                classification.append("negate")
             elif "looking" in utterance or "area" in utterance or "food" in utterance:
-                self.classification.append("inform")
+                classification.append("inform")
             elif "else" in utterance:
-                self.classification.append("reqalts")
+                classification.append("reqalts")
             else: 
-                self.classification.append("inform")
+                classification.append("inform")
+        return classification
 
-    def evaluate (self, labels):
+    def evaluate(self, labels):
         correct = 0
-
         for i in range(len(labels)):
             if labels[i] == self.classification[i]:
                 correct += 1
-
         training_accuracy = correct / len(labels)
-
         return training_accuracy
+    
+    def predict(self, input):
+        return self._classify(input)

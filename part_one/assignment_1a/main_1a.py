@@ -12,6 +12,7 @@ def main():
     # KEYWORDMATCHING -------------------------------------------------------------------
     km_model = KeywordMatchingModel(X_train)
     km_acc = km_model.evaluate(y_train)
+    print(X_train[0])
     print("Keyword matching model accuracy is ", km_acc)
 
     # Save the keyword matching model
