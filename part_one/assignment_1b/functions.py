@@ -56,7 +56,6 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
     stopwords = {"i", "am", "looking", "for", "a", "an", "the", "in", "to", "of", "is",
                  "and", "on", "that", "please", "with", "find", "it"}
     words = [word.lower() for word in words if word.lower() not in stopwords]
-    print(words)
 
     preferences_dict = {"food type": None,
                         "area": None,
@@ -83,7 +82,6 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
         elif word in dontcare_signal:
             # Match with preference context
             window = words[max(0, i - 3):i + 3]
-            print(window)
 
             if any(kw in window for kw in location_signal):
                 preferences_dict["area"] = 'dontcare'
@@ -98,21 +96,18 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
         elif len(word) > 4:        # Only 'longer' words bc otherwise filter is too broad
             closest_match = Levenshtein_matching(word.lower(), db_cuisine)
             if closest_match:
-                print(word, closest_match)
                 if preferences_dict["food type"] == None: # Only fill up when no other value saved: 'west part of town'
                     preferences_dict["food type"] = closest_match
                     continue 
 
             closest_match = Levenshtein_matching(word.lower(), db_areas)
             if closest_match:
-                print(word, closest_match)
                 if preferences_dict["area"] == None:
                     preferences_dict["area"] = closest_match
                     continue
 
             closest_match = Levenshtein_matching(word.lower(), db_pricerange)
             if closest_match:
-                print(word, closest_match)
                 if preferences_dict["pricerange"] == None:
                     preferences_dict["pricerange"] = closest_match
                     continue
@@ -129,7 +124,6 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
                 preferences_dict["food type"] = words[i-1]
 
     return preferences_dict
-
 
 
 def lookup(restaurant_df, preferences_dict):
