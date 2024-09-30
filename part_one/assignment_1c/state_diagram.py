@@ -1,3 +1,4 @@
+
 from functions import *
 import pandas as pd
 
@@ -17,12 +18,7 @@ class State_diagram:
         self.available_restaurants = None
         self.dialog_act = None
 
-
     def state_transition_function(self, user_input=None):
-        """
-        This function transitions the state of the system based on the user input and the dialog act.
-        """
-
         if self.dialog_act == "bye":
             print("System: You are welcome. Have a nice day!")
             self.state = "endstate"
@@ -104,11 +100,12 @@ class State_diagram:
             
             self.is_state = True
 
+        else:
+            print('big mistake')
+            print(self.state)
+            print(self.dialog_act)
 
-    def run(self, model, vectorizer):   
-        """
-        This function runs the state diagram of the system. It takes in the ML model and the vectorizer as inputs.
-        """     
+    def run(self, model, vectorizer, vectorized):        
         print("System: Hello, welcome to the Cambridge restaurant system? You can ask for restaurants by area, price range or food type. How may I help you?")
         
         user_input = None
@@ -119,7 +116,12 @@ class State_diagram:
                 vectorized_user_input = vectorizer.transform([user_input])
 
                 # Classifying user input using ML model
-                self.dialog_act = model.predict(vectorized_user_input)[0]
+                if vectorized:
+                    self.dialog_act = model.predict(vectorized_user_input)[0]
+                else:
+                    print(user_input)
+                    self.dialog_act = model.predict([[user_input]])[0]
+                print(self.dialog_act)
                 self.state_transition_function(user_input)
 
             else:
