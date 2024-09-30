@@ -6,7 +6,7 @@ from models.Decision_tree import DecisionTreeModel
 from functions import datacleaning, vectorize
 
 def main():
-    file_path = 'part_one\\dialog_acts.dat'
+    file_path = 'part_one\\data\\dialog_acts.dat'
     X_train, X_test, y_train, y_test = datacleaning(file_path)
 
     # KEYWORDMATCHING -------------------------------------------------------------------
@@ -54,4 +54,6 @@ def main():
     with open(r'part_one/trained_models/dt_model.pkl', 'wb') as f:
         pickle.dump(dt_model, f)
 
-main()
+
+if __name__ == "__main__":
+    main()

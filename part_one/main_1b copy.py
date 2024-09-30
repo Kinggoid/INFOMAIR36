@@ -1,16 +1,13 @@
+from models.KeyWordMatching import KeywordMatchingModel
+from models.LogisticRegression import LogisticRegressionModel
+from functions import datacleaning, vectorize
+from sklearn.feature_extraction.text import TfidfVectorizer
 import random
-import pickle
-import re
-import pandas as pd
 import Levenshtein
-
-########## not worked out yet ##############
-class state_diagram:
-    def __init__(self, states):
-        self.area = None
-        self.food = None
-        self.price = None
-
+import random
+import pandas as pd
+import numpy as np
+import re
 
 class State:
     def __init__(self, name, message):
@@ -29,35 +26,58 @@ class State:
             return self
 
 
+# STATE TRANSITION FUNCTION: ----------------------------------------------------------
+def state_transition_function(current_state, user_input):
+    
+    print(f"System dialog state: {current_state.name}")
+    
+    # 1. Convert user input to lower case
+    user_input = user_input.lower()
+
+    # 2. Classify input (classifier 1a) >> TO-DO later
+    dialog_act = KeywordMatchingModel(user_input)
+    dialog_act = "hello"
+
+    # 3. Update dialogstate and decide system output (as in state transition diagram!)
+    next_state = current_state.next_state(dialog_act)
+    system_response = ""
+
+    if current_state.name == DialogState.WELCOME:
+        if dialog_act == DialogAct.HELLO:
+            system_response = "In what area would you like to eat?"
+
+    elif current_state.name == DialogState.ASK_AREA:
+        print("State switch to dialogState = ASK_AREA")
+        if dialog_act == DialogAct.INFORM:
+            system_response = "Thank you!"
+        elif dialog_act == DialogAct.REQUEST:
+            system_response = "What information would you like to know?"
+    
+    elif current_state.name == DialogState.END:
+        system_response = "The conversation has ended."
+
+    return next_state, system_response
+
+def lookup(preferences):
+    list_of_possible_restaurants = []
+    return list_of_possible_restaurants
+
 # Identify user preference statements ---------------------------------------------------
 
-def Levenshtein_matching(word: str, options: list, threshold: int = 3) -> str:
-    """
-    Finds the closest match for a word from a list of options using Levenshtein distance.
+def Levenshtein_matching(word, options):
 
-    Parameters:
-    word (str): The word to match.
-    options (list): A list of possible options.
-    threshold (int): The maximum distance to consider a match. Default is 3.
-
-    Returns:
-    str: The closest matching word from the options, or None if no match is found within the threshold.
-    """
     closest_matches = []
-    distances = []
-
     for option in options:
         distance = Levenshtein.distance(word, option)
-        if distance <= threshold:
-            closest_matches.append(option)
-            distances.append(distance)
+        if distance < 3:
+            closest_matches.append((option, distance))
     
     if closest_matches:
         min_distance = min(closest_matches, key=lambda x: x[1])[1]
         best_matches = [match for match, dist in closest_matches if dist == min_distance]
         return random.choice(best_matches)
 
-    return None  # No match with word from db
+    return None # No match with word from db
 
 
 def extract_preferences(user_utterence_input):
@@ -70,15 +90,38 @@ def extract_preferences(user_utterence_input):
     user_utterence_input = re.sub(r'[^\w\s]', '', user_utterence_input)
     words = user_utterence_input.split()
 
-    # TO-DO: "don't care" >> turn into one word or something else
+    # Glue doesntmatter & dontcare together to be recognized for 'dontcare' label
+    final_words = []
+    skip_next_word = 0
+
+    for i, word in enumerate(words):
+        
+        # Skip the next word after word-combo has already been added to copy words
+        if skip_next_word == 1:
+            # Reset
+            skip_next_word = 0
+            continue
+        
+        # Loop through sentence and make an adjusted copy
+        if word == "dont" and words[i+1] == "care" and i+1<len(words):
+            final_words.append("dontcare")
+            skip_next_word = 1
+        elif word == "doesnt" and words[i+1] == "matter" and i+1<len(words):
+            final_words.append("doesntmatter")
+            skip_next_word = 1
+        else:
+            final_words.append(word)
+
+    words = final_words
 
     # Remove stop words from utterence
     stopwords = {"i", "am", "looking", "for", "a", "an", "the", "in", "to", "of", "is",
                  "and", "on", "that", "please", "with", "find", "it"}
     words = [word.lower() for word in words if word.lower() not in stopwords]
-    
-    preferences_dict = {"location": "empty",
-                        "cuisine": "empty",
+    print(words)
+
+    preferences_dict = {"cuisine": "empty",
+                        "location": "empty",
                         "pricerange": "empty"}
 
     # Save all the options for typefood, area and location
@@ -88,7 +131,7 @@ def extract_preferences(user_utterence_input):
     db_cuisine = set(df['food'].dropna().str.lower())
 
     # Predefined 'dontcare' signaling words + area/food/price specification words
-    dontcare_signal = {'any', 'whatever', "dontcare"}
+    dontcare_signal = {'any', 'whatever', "dontcare", "doesntmatter", "anywhere", "rest"}
     location_signal = {"area", "location", "part", "place", "town"}
     cuisine_signal = {"food", "cuisine", "type", "restaurant", "eat", "serves"}
     pricerange_signal = {"price", "cost", "budget"}
@@ -96,7 +139,6 @@ def extract_preferences(user_utterence_input):
     # Go through the sentence(s)
     for i, word in enumerate(words):
 
-        # TO-DO: what to do with 'world'/ 'Swedish'
         # Keyword matching
         if word in db_cuisine:
             preferences_dict["cuisine"] = word
@@ -121,25 +163,39 @@ def extract_preferences(user_utterence_input):
                 preferences_dict["undefined_context"] = 'dontcare'
 
         # If no exact match, check for closest match
-        elif word != 'want':        # TO-DO: 'part'/'want' turns into 'east'or 'west' with Levenshtein
+        elif len(word) > 4:        # Only 'longer' words bc otherwise filter is too broad
             closest_match = Levenshtein_matching(word.lower(), db_cuisine)
             if closest_match:
                 print(word, closest_match)
-                preferences_dict["cuisine"] = closest_match
-                continue 
+                if preferences_dict["cuisine"] == "empty": # Only fill up when no other value saved: 'west part of town'
+                    preferences_dict["cuisine"] = closest_match
+                    continue 
 
             closest_match = Levenshtein_matching(word.lower(), db_areas)
             if closest_match:
                 print(word, closest_match)
-                preferences_dict["location"] = closest_match
-                continue
+                if preferences_dict["location"] == "empty":
+                    preferences_dict["location"] = closest_match
+                    continue
 
             closest_match = Levenshtein_matching(word.lower(), db_pricerange)
             if closest_match:
                 print(word, closest_match)
-                preferences_dict["pricerange"] = closest_match
-                continue
-        
+                if preferences_dict["pricerange"] == "empty":
+                    preferences_dict["pricerange"] = closest_match
+                    continue
+
+        # Final check: possible unrecognized foodtype preference missed?
+        elif word == 'food' and preferences_dict["cuisine"] == "empty":
+            
+            # Option 1: "serving"/"for" + preference + "food"
+            if i - 2 > 0 and (words[i-2].startswith("serv") or words[i-2] == "for"):
+                preferences_dict["cuisine"] = words[i-1]
+
+            # Option 2: nationality ending with -ish or -an + "food"
+            elif i-1 > 0 and (words[i-1].endswith("ish") or words[i-1].endswith("an")):
+                preferences_dict["cuisine"] = words[i-1]
+
     return preferences_dict
 
 
@@ -149,6 +205,7 @@ def lookup(preferences):
     Function that takes the preference dictionary (stating cuisine, area and pricerange
     preferences) and loops through the restaurant_info.csv file to find possible restaurants.
     These names are saved in a list and given as output.
+    NOTE: Needs fully filled preference dict (doesn't deal with empty values)
     """
 
     # Read CSV
@@ -165,93 +222,92 @@ def lookup(preferences):
     if preferences["pricerange"] != "dontcare":
         df = df[df["pricerange"].str.lower() == preferences["pricerange"]]
 
-    # NOTE: dealt nog niet met 'empty', ergens anders wann 'dontcare' veranderen in dict
-
     # Save names to list
     list_of_possible_restaurants = df["restaurantname"].tolist()
 
     return list_of_possible_restaurants
 
-
 # Example dialog simulation -------------------------------------------------------------
-def state_transition_function(initial_state, user_input, dialog_act):
-    #show current state
+def run_dialog(model, initial_state):
+    # Example of using the state transitions
     current_state = initial_state
     print(f"Current state: {current_state.name}")
     print(f"System: {current_state.message}")
 
-    #only assign preference_dict if its an INFORM act
-    if dialog_act == "INFORM":
-        preference_dict = extract_preferences(user_input)
-
-    #logic for state transitions
-    if current_state == welcome_state:      # Go to ask_area state if you do not know where the user wants to eat
-        if dialog_act == "INFORM":
-            if preference_dict[0] == "empty":
-               current_state = ask_area_state
-               return ask_area_state
-    elif current_state == ask_area_state:   # Go to ask_food_state if you do not know what food the user wants to eat
-        if dialog_act == "INFORM":
-            if preference_dict[1] == "empty":
-                current_state == ask_food_state
-                return current_state
-    elif current_state == ask_food_state:   # Go to ask_price state if you do not know what price the user wants to pay
-        if dialog_act == "INFORM":
-            if preference_dict[2] == "empty":
-                current_state == ask_price_state
-                return current_state
-    elif current_state == ask_price_state:   # Go to ask_price state if you do not know what price the user wants to pay
-        if dialog_act == "INFORM":
-            if preference_dict[2] == "empty":
-                current_state == ask_price_state
-                return current_state
-
-
-
-
-
-def main():
-    # Load the trained logistic regression model
-    with open(r'part_one/trained_models/lr_model.pkl', 'rb') as f:
-        model = pickle.load(f)
-        
-    with open(r'part_one/vectorizer.pkl', 'rb') as f:
-        vectorizer = pickle.load(f)
-
-    # Create states
-    welcome_state = State("Welcome", "Welcome to the dialog system.")
-    ask_area_state = State("Ask_area", "In what area would you like to eat?")
-    ask_food_state = State("Ask_food", "What type of food are you looking for?")
-    ask_price_state = State("Ask_price", "What type of price range are you looking for?")
-    double_check_state = State("Double_check","So you want to eat at VAR place?")
-    no_match_state = State("No_match", "Sorry, such a restaurant does not exist")
-    suggest_restaurant_state = State("Suggest_restaurant", "VAR is a nice restaurant to eat at")
-    give_info_state = State("Give_info", "The info for this restaurant is VAR")
-    end_state = State("End", "The conversation has ended.")
-
-    #welcoming user 
-    print(f"Current state: {welcome_state.name}")
-    print(f"System: {welcome_state.message}")
-
-    #setting current state
-    current_state = welcome_state
-
-    #iterate until you reach the end state
     while current_state.name != "End":
-        #getting user input
+        # Ask user for input
         user_input = input("User: ")
-        #vectorizing input to use for ML model
-        vectorized_user_input = vectorizer.transform([user_input])
-        #classifying user input using ML model
-        dialog_act = model.predict(vectorized_user_input)
-        #print dialog_act
+        print('-----------------------------------------------------------')
+        user_input = user_input.split()
+        print('-----------------------------------------------------------')
+        vectorizer = TfidfVectorizer()
+        print('-----------------------------------------------------------')
+        # Fit and transform the training data
+        print(user_input)
+        # vectorized_user_input = vectorizer.fit_transform(user_input)
+
+        # print(vectorized_user_input)
+        print('-----------------------------------------------------------')
+        dialog_act = model.predict(user_input)
+        
         print(f"User dialog act: {dialog_act}")
 
-        #get upcoming state
-        current_state = state_transition_function(current_state, user_input, dialog_act)
+
+        # Simulate a transition
+        current_state = current_state.next_state(dialog_act)
+        print(f"Next state: {current_state.name}")
         print(f"System: {current_state.message}")
 
 
 
+def main():
+    file_path = 'part_one\\dialog_acts.dat'
+    X_train, X_test, y_train, y_test = datacleaning(file_path)
 
-main()
+    X_train, X_test = vectorize(X_train, X_test)
+
+    model = LogisticRegressionModel()
+    model.fit(X_train, y_train)
+
+    # Create states
+    welcome_state = State("Welcome", "Welcome to the dialog system.")
+    ask_area_state = State("Ask_area", "In what area would you like to eat?")
+    end_state = State("End", "The conversation has ended.")
+
+    # Add transitions
+    welcome_state.add_transition("INFORM", ask_area_state)
+    ask_area_state.add_transition("REQUEST", end_state) 
+
+    print("Welcome to the dialog system.")
+    run_dialog(model, welcome_state)
+
+    
+
+# main()
+
+# Testing extract preferences function: ----------------------------------------------
+# (Jennifer)
+
+user_input = "I'm looking for world food"
+user_input= "I want a restaurant that serves world food"
+user_input= "I want a restaurant serving Swedish food"
+# user_input= "I'm looking for a restaurant in the center" # Check
+# user_input= "I would like a cheap restaurant in the west part of town" # Check
+# user_input= "I'm looking for a moderately priced restaurant in the west part of town" # Check
+# user_input= "I'm looking for a restaurant in any area that serves Tuscan food" # Check
+# user_input= "Can I have an expensive restaurant" # Check
+# user_input= "I'm looking for an expensive restaurant and it should serve international food" # Check
+# user_input= "I need a Cuban restaurant that is moderately priced" # Check
+# user_input= "I'm looking for a moderately priced restaurant with Catalan food" # Check
+# user_input= "What is a cheap restaurant in the south part of town" # Check
+# user_input= "What about Chinese food" # Check
+# user_input= "I wanna find a cheap restaurant" # Check
+# user_input= "I'm looking for Persian food please" # Check
+# user_input= "Find a Cuban restaurant in the center" # Check
+# user_input = "I don't care"
+
+preference_dict = extract_preferences(user_input)
+print(preference_dict)
+
+possible_restaurants = lookup(preference_dict)
+print(possible_restaurants)
