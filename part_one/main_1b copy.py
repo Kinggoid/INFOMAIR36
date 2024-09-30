@@ -200,6 +200,11 @@ def state_transition_function(initial_state, user_input, dialog_act):
             if preference_dict[2] == "empty":
                 current_state == ask_price_state
                 return current_state
+    elif current_state == ask_price_state:   # Go to ask_price state if you do not know what price the user wants to pay
+        if dialog_act == "INFORM":
+            if preference_dict[2] == "empty":
+                current_state == ask_price_state
+                return current_state
 
 
 
