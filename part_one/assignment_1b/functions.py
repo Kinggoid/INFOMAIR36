@@ -1,36 +1,24 @@
 import random
 import re
 import pandas as pd
-from Levenshtein import distance
+from Levenshtein import distance as Levenshtein
 
 
-def Levenshtein_matching(word: str, options: list, threshold: int = 2) -> str:
-    """
-    Finds the closest match for a word from a list of options using Levenshtein distance.
+def Levenshtein_matching(word, options):
 
-    Parameters:
-    word (str): The word to match.
-    options (list): A list of possible options.
-    threshold (int): The maximum distance to consider a match. Default is 2.
-
-    Returns:
-    str: The closest matching word from the options, or None if no match is found within the threshold.
-    """
     closest_matches = []
-    distances = []
-
     for option in options:
-        dist = distance(word, option)  # Use `distance` directly here
-        if dist <= threshold:
-            closest_matches.append((option, dist))
-            distances.append(dist)
+        distance = Levenshtein.distance(word, option)
+        if distance < 3:
+            closest_matches.append((option, distance))
     
     if closest_matches:
-        min_distance = min(distances)
+        min_distance = min(closest_matches, key=lambda x: x[1])[1]
         best_matches = [match for match, dist in closest_matches if dist == min_distance]
         return random.choice(best_matches)
 
-    return None  # No match with word from db
+    return None # No match with word from db
+
 
 def extract_preferences(user_utterence_input):
     """
@@ -42,25 +30,48 @@ def extract_preferences(user_utterence_input):
     user_utterence_input = re.sub(r'[^\w\s]', '', user_utterence_input)
     words = user_utterence_input.split()
 
-    # TO-DO: "don't care" >> turn into one word or something else
+    # Glue doesntmatter & dontcare together to be recognized for 'dontcare' label
+    final_words = []
+    skip_next_word = 0
+
+    for i, word in enumerate(words):
+        
+        # Skip the next word after word-combo has already been added to copy words
+        if skip_next_word == 1:
+            # Reset
+            skip_next_word = 0
+            continue
+        
+        # Loop through sentence and make an adjusted copy
+        if word == "dont" and words[i+1] == "care" and i+1<len(words):
+            final_words.append("dontcare")
+            skip_next_word = 1
+        elif word == "doesnt" and words[i+1] == "matter" and i+1<len(words):
+            final_words.append("doesntmatter")
+            skip_next_word = 1
+        else:
+            final_words.append(word)
+
+    words = final_words
 
     # Remove stop words from utterence
     stopwords = {"i", "am", "looking", "for", "a", "an", "the", "in", "to", "of", "is",
                  "and", "on", "that", "please", "with", "find", "it"}
     words = [word.lower() for word in words if word.lower() not in stopwords]
-    
-    preferences_dict = {"location": "empty",
-                        "cuisine": "empty",
+    print(words)
+
+    preferences_dict = {"cuisine": "empty",
+                        "location": "empty",
                         "pricerange": "empty"}
 
     # Save all the options for typefood, area and location
-    df = pd.read_csv('part_one/data/restaurant_info.csv')
+    df = pd.read_csv('part_one\\restaurant_info.csv')
     db_pricerange = set(df['pricerange'].dropna().str.lower())
     db_areas = set(df['area'].dropna().str.lower())
     db_cuisine = set(df['food'].dropna().str.lower())
 
     # Predefined 'dontcare' signaling words + area/food/price specification words
-    dontcare_signal = {'any', 'whatever', "dontcare"}
+    dontcare_signal = {'any', 'whatever', "dontcare", "doesntmatter", "anywhere", "rest"}
     location_signal = {"area", "location", "part", "place", "town"}
     cuisine_signal = {"food", "cuisine", "type", "restaurant", "eat", "serves"}
     pricerange_signal = {"price", "cost", "budget"}
@@ -68,8 +79,6 @@ def extract_preferences(user_utterence_input):
     # Go through the sentence(s)
     for i, word in enumerate(words):
 
-
-        # TO-DO: what to do with 'world'/ 'Swedish'
         # Keyword matching
         if word in db_cuisine:
             preferences_dict["cuisine"] = word
@@ -77,7 +86,6 @@ def extract_preferences(user_utterence_input):
             preferences_dict["location"] = word
         elif word in db_pricerange:
             preferences_dict["pricerange"] = word
-        
         
         # Check for 'dontcare' preference value
         elif word in dontcare_signal:
@@ -95,25 +103,39 @@ def extract_preferences(user_utterence_input):
                 preferences_dict["undefined_context"] = 'dontcare'
 
         # If no exact match, check for closest match
-        elif word != 'want':        # TO-DO: 'part'/'want' turns into 'east'or 'west' with Levenshtein
+        elif len(word) > 4:        # Only 'longer' words bc otherwise filter is too broad
             closest_match = Levenshtein_matching(word.lower(), db_cuisine)
             if closest_match:
                 print(word, closest_match)
-                preferences_dict["cuisine"] = closest_match
-                continue 
+                if preferences_dict["cuisine"] == "empty": # Only fill up when no other value saved: 'west part of town'
+                    preferences_dict["cuisine"] = closest_match
+                    continue 
 
             closest_match = Levenshtein_matching(word.lower(), db_areas)
             if closest_match:
                 print(word, closest_match)
-                preferences_dict["location"] = closest_match
-                continue
+                if preferences_dict["location"] == "empty":
+                    preferences_dict["location"] = closest_match
+                    continue
 
             closest_match = Levenshtein_matching(word.lower(), db_pricerange)
             if closest_match:
                 print(word, closest_match)
-                preferences_dict["pricerange"] = closest_match
-                continue
-        
+                if preferences_dict["pricerange"] == "empty":
+                    preferences_dict["pricerange"] = closest_match
+                    continue
+
+        # Final check: possible unrecognized foodtype preference missed?
+        elif word == 'food' and preferences_dict["cuisine"] == "empty":
+            
+            # Option 1: "serving"/"for" + preference + "food"
+            if i - 2 > 0 and (words[i-2].startswith("serv") or words[i-2] == "for"):
+                preferences_dict["cuisine"] = words[i-1]
+
+            # Option 2: nationality ending with -ish or -an + "food"
+            elif i-1 > 0 and (words[i-1].endswith("ish") or words[i-1].endswith("an")):
+                preferences_dict["cuisine"] = words[i-1]
+
     return preferences_dict
 
 

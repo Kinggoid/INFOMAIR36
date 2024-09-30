@@ -31,3 +31,5 @@ This is the group logbook. Write here what you have been working on.
 24/25-9-2024 Jennifer -- finished lookup function and extract preference functions, 3h work. (also helped monday working together with Amir and Thijme)
 26-9-2024 Jennifer -- improven schema met Thijme en logica regels voor express preferences afronden, again een paar uurtjes
 27-9-2024 Jennifer -- in ochtend met thijme gebeld voor een uurtje en geprobeerd logica regels te verzinnen, daarna nog verder gewerkt om eindelijk eindelijk die lookup en extract preferences helemaal af te hebben (2.5u)
+
+29-9-2024 Oliver - Worked on 1b, functions, etc. ~6hrs
