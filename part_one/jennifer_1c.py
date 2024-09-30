@@ -5,7 +5,7 @@ from main_1b import extract_preferences, lookup
 import re
 
 # 1. Add new properties into the CSV file
-df = pd.read_csv('part_one\\restaurant_info.csv')
+df = pd.read_csv('part_one/data/restaurant_info.csv')
 
 food_quality_options = ["good", "not good"]
 crowdedness_options = ["busy", "calm"]
