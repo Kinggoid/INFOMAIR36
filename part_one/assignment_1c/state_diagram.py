@@ -18,7 +18,7 @@ class State_diagram:
         self.available_restaurants = None
         self.dialog_act = None
 
-    def state_transition_function(self, user_input=None):
+    def state_transition_function(self, user_input=None, levenshtein_distance_threshold=3):
         if self.dialog_act == "bye":
             print("System: You are welcome. Have a nice day!")
             self.state = "endstate"
@@ -32,7 +32,7 @@ class State_diagram:
 
         elif self.state == "ask_area":
             if self.dialog_act == "inform":
-                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange, levenshtein_distance_threshold)
                 self.preferences_dict["area"] = extracted_preferences.get("area", None)
                 self.state, self.available_restaurants = ask_preferences(
                     user_input, self.preferences_dict, self.unique_areas, self.unique_foodtype, self.unique_pricerange, self.restaurant_df)
@@ -41,7 +41,7 @@ class State_diagram:
 
         elif self.state == "ask_food_type":
             if self.dialog_act == "inform":
-                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange, levenshtein_distance_threshold)
                 self.preferences_dict["food type"] = extracted_preferences.get("food type", None)
                 self.state, self.available_restaurants = ask_preferences(
                     user_input, self.preferences_dict, self.unique_areas, self.unique_foodtype, self.unique_pricerange, self.restaurant_df)
@@ -50,7 +50,7 @@ class State_diagram:
 
         elif self.state == "ask_price_range":
             if self.dialog_act == "inform":
-                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+                extracted_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange, levenshtein_distance_threshold)
                 self.preferences_dict["pricerange"] = extracted_preferences.get("pricerange", None)
                 self.state, self.available_restaurants = ask_preferences(
                     user_input, self.preferences_dict, self.unique_areas, self.unique_foodtype, self.unique_pricerange, self.restaurant_df)
@@ -105,7 +105,7 @@ class State_diagram:
             print(self.state)
             print(self.dialog_act)
 
-    def run(self, model, vectorizer, vectorized):        
+    def run(self, model, vectorizer, vectorized, levenshtein_distance_threshold=3):        
         print("System: Hello, welcome to the Cambridge restaurant system? You can ask for restaurants by area, price range or food type. How may I help you?")
         
         user_input = None
@@ -119,10 +119,8 @@ class State_diagram:
                 if vectorized:
                     self.dialog_act = model.predict(vectorized_user_input)[0]
                 else:
-                    print(user_input)
                     self.dialog_act = model.predict([[user_input]])[0]
-                print(self.dialog_act)
-                self.state_transition_function(user_input)
+                self.state_transition_function(user_input, levenshtein_distance_threshold)
 
             else:
-                self.state_transition_function(user_input=user_input)
+                self.state_transition_function(user_input=user_input, levenshtein_distance_threshold=levenshtein_distance_threshold)

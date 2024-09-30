@@ -10,13 +10,27 @@ def main():
     print("Choose the classification method:")
     print("1. Keyword Matching")
     print("1. Logistic Regression")
-    choice = input("Enter the number of your choice: ")
+    model_choice = input("Enter the number of your choice: ")
 
-    if choice == '1':
+
+    levenshtein_distance_choice = input("Please enter the desired Levenshtein distance (1-10): ")
+
+    while True:
+        try:
+            levenshtein_distance_choice = int(levenshtein_distance_choice)
+            if 1 <= levenshtein_distance_choice <= 10:
+                break
+            else:
+                levenshtein_distance_choice = input("Please enter a valid number between 1 and 10: ")
+        except ValueError:
+            levenshtein_distance_choice = input("Please enter a valid number between 1 and 10: ")
+
+
+    if model_choice == '1':
         with open(r'part_one/trained_models/km_model.pkl', 'rb') as f:
             model = pickle.load(f)
             vectorize = False
-    elif choice == '2':
+    elif model_choice  == '2':
         with open(r'part_one/trained_models/lr_model.pkl', 'rb') as f:
             model = pickle.load(f)
             vectorize = True
@@ -30,8 +44,9 @@ def main():
     with open(r'part_one/vectorizer.pkl', 'rb') as f:
         vectorized = pickle.load(f)
 
+
     state_diagram = State_diagram()
-    state_diagram.run(model, vectorized, vectorize)
+    state_diagram.run(model, vectorized, vectorize, levenshtein_distance_choice)
 
 
 if __name__ == "__main__":
