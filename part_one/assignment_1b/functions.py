@@ -33,7 +33,6 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
     skip_next_word = 0
 
     for i, word in enumerate(words):
-        
         # Skip the next word after word-combo has already been added to copy words
         if skip_next_word == 1:
             # Reset
@@ -142,5 +141,54 @@ def lookup(restaurant_df, preferences_dict):
         restaurant_df = restaurant_df[restaurant_df["food"].str.lower() == preferences_dict["food type"].lower()]
 
     return restaurant_df
+
+
+def ask_preferences(user_input, preferences_dict, unique_areas, unique_foodtype, unique_pricerange, restaurant_df):
+    new_preferences = extract_preferences(user_input, unique_areas, unique_foodtype, unique_pricerange)
+
+    # Update the existing preferences_dict
+    for key, value in new_preferences.items():
+        if value is not None:
+            preferences_dict[key] = value
+
+    missing_preferences = [pref for pref, value in preferences_dict.items() if value is None]
+
+    available_restaurants = lookup(restaurant_df, preferences_dict)
+    if available_restaurants.empty:
+        print(f"System: I am sorry, there are no restaurants with those preferences: "
+              f"Area: {preferences_dict['area']}, "
+              f"Food Type: {preferences_dict['food type']}, "
+              f"Price Range: {preferences_dict['pricerange']}. "
+              "Please provide me with different preferences.")
+        return "preference_doesnt_exist", available_restaurants
+    elif not missing_preferences:
+        # Suggest the first restaurant from the filtered DataFrame
+        suggest_restaurant(available_restaurants)
+        return "suggest_restaurant", available_restaurants
+    elif "area" in missing_preferences:
+        print("System: In what area would you like to eat?")
+        return "ask_area", available_restaurants
+    elif "food type" in missing_preferences:
+        print("System: What type of food are you looking for?")	
+        return "ask_food_type", available_restaurants
+    elif "pricerange" in missing_preferences:
+        print("System: What type of price range are you looking for?")
+        return "ask_price_range", available_restaurants
+    else:
+        print('For testing. If you read this, something went wrong')
+        return None, available_restaurants
+
+
+def suggest_restaurant(available_restaurants):
+    suggested_restaurant = available_restaurants.iloc[0]
+    
+    # Extract details of the suggested restaurant
+    restaurant_name = suggested_restaurant['restaurantname']
+    restaurant_food = suggested_restaurant['food']
+    restaurant_area = suggested_restaurant['area']
+    restaurant_pricerange = suggested_restaurant['pricerange']
+    
+    # Print the suggestion
+    print(f"System: I suggest {restaurant_name}. It serves {restaurant_food} food in the {restaurant_area} area and falls within the {restaurant_pricerange} price range.")
 
 

@@ -8,7 +8,8 @@ def main():
     # Load the trained logistic regression model
     with open(r'part_one/trained_models/lr_model.pkl', 'rb') as f:
         model = pickle.load(f)
-        
+    
+    # Load the vectorizer
     with open(r'part_one/vectorizer.pkl', 'rb') as f:
         vectorizer = pickle.load(f)
 
