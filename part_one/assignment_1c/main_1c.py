@@ -9,7 +9,7 @@ def main():
     # Ask the user for the classification method
     print("Choose the classification method:")
     print("1. Keyword Matching")
-    print("1. Logistic Regression")
+    print("2. Logistic Regression")
     model_choice = input("Enter the number of your choice: ")
 
 

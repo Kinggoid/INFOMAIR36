@@ -3,7 +3,7 @@ import re
 import pandas as pd
 from Levenshtein import distance as levenshtein_distance
 
-def Levenshtein_matching(word, options, levenshtein_distance=3):
+def Levenshtein_matching(word, options, threshold=3):
     closest_matches = []
     for option in options:
         dist = levenshtein_distance(word, option)
@@ -93,19 +93,19 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
 
         # If no exact match, check for closest match
         elif len(word) > 4:        # Only 'longer' words bc otherwise filter is too broad
-            closest_match = Levenshtein_matching(word.lower(), db_cuisine, threshold=threshold)
+            closest_match = Levenshtein_matching(word.lower(), db_cuisine, threshold)
             if closest_match:
                 if preferences_dict["food type"] == None: # Only fill up when no other value saved: 'west part of town'
                     preferences_dict["food type"] = closest_match
                     continue 
 
-            closest_match = Levenshtein_matching(word.lower(), db_areas, threshold=threshold)
+            closest_match = Levenshtein_matching(word.lower(), db_areas, threshold)
             if closest_match:
                 if preferences_dict["area"] == None:
                     preferences_dict["area"] = closest_match
                     continue
 
-            closest_match = Levenshtein_matching(word.lower(), db_pricerange, threshold=threshold)
+            closest_match = Levenshtein_matching(word.lower(), db_pricerange, threshold)
             if closest_match:
                 if preferences_dict["pricerange"] == None:
                     preferences_dict["pricerange"] = closest_match
