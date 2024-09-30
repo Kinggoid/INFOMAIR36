@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import random
-from assignment_1b.functions import extract_preferences, lookup
+from functions import extract_preferences, lookup
 import re
 
 
@@ -47,19 +47,11 @@ user_input = re.sub(r'[^\w\s]', '', user_input)
 words = set(user_input.split())
 
 # 3. Extract additional requirements
-additional_requirements = []
 additional_req_signal = {"touristic", "assigned seats", "children", "romantic"}
-additional_requirements.append(words & additional_req_signal)
 
+# Use list comprehension to filter the matching requirements
+additional_requirements = [match for match in additional_req_signal if match in words]
 
-# 4. Apply inference rules to update possible_restaurants list
-for restaurant in possible_restaurants:
-
-    # Find all the values from the df
-    restaurant_info = df[df["restaurantname"] == restaurant]
-    restaurant["consequent"] = apply_inference_rules(restaurant_info, additional_requirements)
-
-    
 # ------------------------------------------------------------------------------
 
 def apply_inference_rules(restaurant_info, additional_requirements):
@@ -80,19 +72,38 @@ def apply_inference_rules(restaurant_info, additional_requirements):
     consequent = None
 
     #setting amount of requirements
-    num_requirements = additional_requirements.count
+    num_requirements = len(additional_requirements)
 
     #loop over all requirements
-    for i in range(num_requirement):
+    for i in range(num_requirements):
         if additional_requirements[i] == 'touristic':
-            if (princerange == 'cheap' and food_quality == 'good'):
+            if (pricerange == 'cheap' and food_quality == 'good'):
                 consequent.append('touristic')
-
-
-
-    
+        if additional_requirements[i] == 'romantic':
+            if (length_of_stay == 'long stay'):
+                consequent.append('romantic')
+    print(consequent)
+    #continue for other requirements.... :D
 
     return consequent
+
+
+
+# 4. Apply inference rules to update possible_restaurants list
+for restaurant in possible_restaurants:
+    # Find all the values from the df
+    restaurant_info = df[df['restaurantname'] == restaurant]
+
+    #get index to change possible_restaurant value at "consequent"
+    index = restaurant_info.index[0]
+
+    # Apply inference rules to get the new consequent for this restaurant
+    consequent = apply_inference_rules(restaurant_info.iloc[0], additional_requirements)
+        
+    # Update the 'consequent' column for this restaurant in the dataframe
+    possible_restaurants.at[index, 'consequent'] = consequent
+
+    
 
 
 # ------------------------------------------------------------------------------
