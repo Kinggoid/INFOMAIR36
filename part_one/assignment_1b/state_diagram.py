@@ -1,4 +1,3 @@
-from state import State
 from functions import *
 import pandas as pd
 

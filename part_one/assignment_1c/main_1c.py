@@ -13,9 +13,6 @@ def main():
     print("3. Logistic Regression")
     choice = input("Enter the number of your choice: ")
 
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'part_one')))
-
-
     if choice == '1':
         with open(r'part_one/trained_models/mc_model.pkl', 'rb') as f:
             model = pickle.load(f)
