@@ -8,31 +8,30 @@ from functions import *
 def main():
     # Ask the user for the classification method
     print("Choose the classification method:")
-    print("1. Majority")
-    print("2. Keyword Matching")
-    print("3. Logistic Regression")
+    print("1. Keyword Matching")
+    print("1. Logistic Regression")
     choice = input("Enter the number of your choice: ")
 
     if choice == '1':
-        with open(r'part_one/trained_models/mc_model.pkl', 'rb') as f:
-            model = pickle.load(f)
-    elif choice == '2':
         with open(r'part_one/trained_models/km_model.pkl', 'rb') as f:
             model = pickle.load(f)
-    elif choice == '3':
+            vectorize = False
+    elif choice == '2':
         with open(r'part_one/trained_models/lr_model.pkl', 'rb') as f:
             model = pickle.load(f)
+            vectorize = True
     else:
         print("Invalid choice. Defaulting to Logistic Regression.")
         with open(r'part_one/trained_models/lr_model.pkl', 'rb') as f:
             model = pickle.load(f)
+            vectorize = True
     
     # Load the vectorizer
     with open(r'part_one/vectorizer.pkl', 'rb') as f:
-        vectorizer = pickle.load(f)
+        vectorized = pickle.load(f)
 
     state_diagram = State_diagram()
-    state_diagram.run(model, vectorizer)
+    state_diagram.run(model, vectorized, vectorize)
 
 
 if __name__ == "__main__":
