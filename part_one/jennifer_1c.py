@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import random
-from main_1b_copy import extract_preferences, lookup
+from main_1b import extract_preferences, lookup
 import re
 
 # 1. Add new properties into the CSV file
