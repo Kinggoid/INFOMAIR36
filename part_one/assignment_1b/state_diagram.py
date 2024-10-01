@@ -13,6 +13,8 @@ class State_diagram:
                         "food type": None,
                         "pricerange": None}
                         
+        self.informal = False
+
         self.restaurant_df = pd.read_csv('part_one\\data\\restaurant_info.csv')
         self.unique_pricerange = set(self.restaurant_df['pricerange'].dropna().str.lower())
         self.unique_areas = set(self.restaurant_df['area'].dropna().str.lower())
@@ -21,11 +23,30 @@ class State_diagram:
         self.prefences_exists = False
         self.available_restaurants = None
         self.dialog_act = None
-        
+
+        self.formal_dialogue = ["System: You are welcome. Have a nice day!", 
+                                "System: I am sorry, I did not understand that. Please provide me with more information.",
+                                "System: I am sorry, there are no restaurants with those preferences. Please provide me with different preferences.",
+                                "System: I have all the information I need. I will now suggest a restaurant.",
+                                "System: In what area would you like to eat?",
+                                "System: What type of food are you looking for?",
+                                "System: What type of price range are you looking for?",
+                                ]
+        self.informal_dialogue = ["System: Alright, take it easy. See you next time!",  
+                                  "System: Uh... I didn't quite catch that... Mind telling me again?",
+                                  "System: Hey, it doesn't look like there's any places that fit what you want. Maybe switch up your demands a bit and check again...",
+                                  "System: Alright, got it all down. Let's see if you'll like this one...",
+                                  "System: Where in town do ya wanna eat?",
+                                  "What do you feel like eating?",
+                                  "Alright, so how much do you wanna pay for this?"]
+        self.system_utterances = self.formal_dialogue
     
     def state_transition_function(self, user_input = None):
         if self.dialog_act == "thankyou" or self.dialog_act == "bye":
-            print("System: You are welcome. Have a nice day!")
+            if self.informal:
+                print(self.informal_dialogue[0])
+            else:
+                print(self.formal_dialogue[0])
             self.state = "endstate"
             
         elif self.state == "welcome":
@@ -33,7 +54,10 @@ class State_diagram:
                 self.state = "ask_preferences"
                 self.is_state = False
             else:
-                print("System: I am sorry, I did not understand that. Please provide me with more information.")
+                if self.informal: 
+                    print(self.informal_dialogue[1])
+                else:
+                    print(self.formal_dialogue[1])
 
         elif self.state == "ask_preferences":
             # Extract new preferences
@@ -48,10 +72,16 @@ class State_diagram:
 
             self.available_restaurants = lookup(self.restaurant_df, self.preferences_dict)
             if self.available_restaurants.empty:
-                print(f"System: I am sorry, there are no restaurants with those preferences. Please provide me with different preferences.")
+                if self.informal:
+                    print(self.informal_dialogue[2])
+                else:
+                    print(self.formal_dialogue[2])
                 self.state = "preference_doesnt_exist"
             elif not missing_preferences:
-                print("System: I have all the information I need. I will now suggest a restaurant.")
+                if self.informal:
+                    print(self.informal_dialogue[3])
+                else:
+                    print(self.formal_dialogue[3])
                 
                 # Suggest the first restaurant from the filtered DataFrame
                 suggested_restaurant = self.available_restaurants.iloc[0]
@@ -66,13 +96,22 @@ class State_diagram:
                 print(f"System: I suggest {restaurant_name}. It serves {restaurant_food} food in the {restaurant_area} area and falls within the {restaurant_pricerange} price range.")
                 self.state = "suggest_restaurant"
             elif "area" in missing_preferences:
-                print("System: In what area would you like to eat?")
+                if self.informal:
+                    print(self.informal_dialogue[4])
+                else:
+                    print(self.formal_dialogue[4])
                 self.state = "ask_area"
             elif "food type" in missing_preferences:
-                print("System: What type of food are you looking for?")	
+                if self.informal:
+                    print(self.informal_dialogue[5])
+                else:
+                    print(self.formal_dialogue[5])	
                 self.state = "ask_food_type"
             elif "pricerange" in missing_preferences:
-                print("System: What type of price range are you looking for?")
+                if self.formal:
+                    print(self.informal_dialogue[6])
+                else:
+                    print(self.formal_dialogue[6])
                 self.state = "ask_price_range"
             else:
                 print('For testing. If you read this, something went wrong')
@@ -171,6 +210,12 @@ class State_diagram:
             print(self.state)
             if self.is_state:
                 user_input = input("You: ").lower()
+                if "informal" in user_input:
+                    self.system_utterances = self.informal_dialogue
+                elif "formal" in user_input:
+                    self.system_utterances = self.formal_dialogue
+
+
                 vectorized_user_input = vectorizer.transform([user_input])
 
                 #classifying user input using ML model
