@@ -58,13 +58,15 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
 
     preferences_dict = {"food type": None,
                         "area": None,
-                        "pricerange": None}
+                        "pricerange": None,
+                        "informal": False}
 
     # Predefined 'dontcare' signaling words + area/food/price specification words
     dontcare_signal = {'any', 'whatever', "dontcare", "doesntmatter", "anywhere", "rest"}
     location_signal = {"area", "location", "part", "place", "town"}
     cuisine_signal = {"food", "cuisine", "type", "restaurant", "eat", "serves"}
     pricerange_signal = {"price", "cost", "budget"}
+    informal_signal = {"formal", "informal"}
 
     # Go through the sentence(s)
     for i, word in enumerate(words):
@@ -90,6 +92,16 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
                 preferences_dict["pricerange"] = 'dontcare'
             else:
                 preferences_dict["undefined_context"] = 'dontcare'
+
+        elif word in informal_signal: 
+            # Match with preference context
+            window = words[max(0, i - 3):i + 3]
+            print(window)
+
+            if (word == "formal"):
+                preferences_dict["informal"] = False
+            else:
+                preferences_dict["informal"] = True
 
         # If no exact match, check for closest match
         elif len(word) > 4:        # Only 'longer' words bc otherwise filter is too broad
