@@ -12,10 +12,8 @@ def main():
     print("2. Logistic Regression")
     model_choice = input("Enter the number of your choice: ")
 
-
-    levenshtein_distance_choice = input("Please enter the desired Levenshtein distance (1-10): ")
-
     while True:
+        levenshtein_distance_choice = input("Please enter the desired Levenshtein distance (1-10): ")
         try:
             levenshtein_distance_choice = int(levenshtein_distance_choice)
             if 1 <= levenshtein_distance_choice <= 10:
@@ -25,6 +23,10 @@ def main():
         except ValueError:
             levenshtein_distance_choice = input("Please enter a valid number between 1 and 10: ")
 
+    while True:
+        allow_dialog_restart = input("Allow dialog restarts? (y/n): ")
+        if allow_dialog_restart == 'y' or allow_dialog_restart == 'n':
+            break
 
     if model_choice == '1':
         with open(r'part_one/trained_models/km_model.pkl', 'rb') as f:
@@ -43,10 +45,10 @@ def main():
     # Load the vectorizer
     with open(r'part_one/vectorizer.pkl', 'rb') as f:
         vectorized = pickle.load(f)
-
+    
 
     state_diagram = State_diagram()
-    state_diagram.run(model, vectorized, vectorize, levenshtein_distance_choice)
+    state_diagram.run(model, vectorized, vectorize, levenshtein_distance_choice, allow_dialog_restart)
 
 
 if __name__ == "__main__":

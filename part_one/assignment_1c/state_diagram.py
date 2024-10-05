@@ -18,10 +18,17 @@ class State_diagram:
         self.available_restaurants = None
         self.dialog_act = None
 
-    def state_transition_function(self, user_input=None, levenshtein_distance_threshold=3):
+    def state_transition_function(self, user_input=None, levenshtein_distance_threshold=3, allow_dialog_restart='y'):
         if self.dialog_act == "bye":
             print("System: You are welcome. Have a nice day!")
             self.state = "endstate"
+        
+        elif "restart" in user_input and allow_dialog_restart == 'y':
+            self.state = "welcome"
+            self.preferences_dict = {"area": None, "food type": None, "pricerange": None}
+            self.available_restaurants = None
+            self.dialog_act = None
+            print("System: Hello, welcome to the Cambridge restaurant system? You can ask for restaurants by area, price range or food type. How may I help you?")
             
         elif self.state == "welcome":
             if self.dialog_act == "inform" or self.dialog_act == "null":
@@ -105,7 +112,7 @@ class State_diagram:
             print(self.state)
             print(self.dialog_act)
 
-    def run(self, model, vectorizer, vectorized, levenshtein_distance_threshold=3):        
+    def run(self, model, vectorizer, vectorized, levenshtein_distance_threshold=3, allow_dialog_restart='y'):        
         print("System: Hello, welcome to the Cambridge restaurant system? You can ask for restaurants by area, price range or food type. How may I help you?")
         
         user_input = None
@@ -120,7 +127,7 @@ class State_diagram:
                     self.dialog_act = model.predict(vectorized_user_input)[0]
                 else:
                     self.dialog_act = model.predict([[user_input]])[0]
-                self.state_transition_function(user_input, levenshtein_distance_threshold)
+                self.state_transition_function(user_input, levenshtein_distance_threshold, allow_dialog_restart)
 
             else:
-                self.state_transition_function(user_input=user_input, levenshtein_distance_threshold=levenshtein_distance_threshold)
+                self.state_transition_function(user_input=user_input, levenshtein_distance_threshold=levenshtein_distance_threshold, allow_dialog_restart = allow_dialog_restart)
