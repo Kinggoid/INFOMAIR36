@@ -86,5 +86,6 @@ def apply_inference_rules(restaurant_info, additional_requirement, boolean):
 
 
 # ------------------------------------------------------------------------------
+
 # 4. Answer and explain
 
