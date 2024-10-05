@@ -11,8 +11,10 @@ This is the group logbook. Write here what you have been working on.
 19/09/2024 Thijme -- 09:00 - 11:00 understanding and cleaning code
 19/09/2024 Thijme -- 11:15 - 12:35 reorganised all code, put it through the main, deleted duplicate code, pushed it to main, fixed error, made all models into classes etc
 
+16-9-2024, Amir -- Worked on the decision tree classifier after school, after that was done I spent some time making the code free of bugs to hand it in for soft deadline 1. 4-5h work. (Oliver and Jennifer as well)
 19-9-2024, Amir -- worked on fixing further bugs in the baseline models and trying to make a start on 1b. 2-3h work.
 
+<<<<<<< Updated upstream
 23-9-2024 Thijme -- 17:00 - 21:30 coderen
 23-9-2024, Amir -- worked on 1b after school and spent some time also trying to fix the last bugs before handing it in: 6h work
 23-9-2024, Oliver -- worked on state diagram: 4 hrs
@@ -34,3 +36,6 @@ This is the group logbook. Write here what you have been working on.
 
 29-9-2024 Oliver - Worked on 1b, functions, etc. ~6hrs
 30-9-2024, Amir -- Worked on the logic for the inference rules 8.5h work 
+=======
+22-09-2024 Jennifer -- make diagram model thing (1h)
+>>>>>>> Stashed changes
