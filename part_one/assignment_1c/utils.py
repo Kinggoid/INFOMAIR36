@@ -41,7 +41,8 @@ def suggest_restaurant(available_restaurants):
     """
     Suggest a restaurant based on the available restaurants
     """
-    suggested_restaurant = available_restaurants.iloc[0]
+    random_index = random.randint(0, len(available_restaurants)-1)
+    suggested_restaurant = available_restaurants.iloc[random_index]
     
     # Extract details of the suggested restaurant
     restaurant_name = suggested_restaurant['restaurantname']
@@ -51,7 +52,7 @@ def suggest_restaurant(available_restaurants):
     
     # Print the suggestion
     print(f"System: I suggest {restaurant_name}. It serves {restaurant_food} food in the {restaurant_area} area and falls within the {restaurant_pricerange} price range.")
-
+    return random_index
 
 def add_reasoning_data(df):
     """

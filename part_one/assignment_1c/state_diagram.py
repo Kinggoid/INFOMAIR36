@@ -25,6 +25,7 @@ class State_diagram:
         self.dialog_act = None
 
         self.additional_requirements_done = False
+        self.suggested_restaurant_index = None
 
         self.formal_dialogue = [
             "System: You are welcome. Have a nice day!", 
@@ -97,7 +98,7 @@ class State_diagram:
                 print(self.system_utterances[11])
                 self.state = "additional_requirements"
             else:
-                suggest_restaurant(self.available_restaurants)
+                self.suggested_restaurant_index = suggest_restaurant(self.available_restaurants)
                 self.state = "suggest_restaurant"
         elif "area" in missing_preferences:
             print(self.system_utterances[3])
@@ -157,7 +158,7 @@ class State_diagram:
         
         elif self.state == "additional_requirements":
             if "no additional requirements" in user_input:
-                suggest_restaurant(self.available_restaurants)
+                self.suggested_restaurant_index = suggest_restaurant(self.available_restaurants)
                 self.state = "suggest_restaurant"
                 self.additional_requirements_done = True
             else:
@@ -167,7 +168,7 @@ class State_diagram:
                     requirements_str = ', '.join(requirements)
                     print(f'System: The restaurants have been filtered by the requirements: {requirements_str}')
                     self.available_restaurants = valid_restaurants
-                    suggest_restaurant(self.available_restaurants)
+                    self.suggested_restaurant_index = suggest_restaurant(self.available_restaurants)
                     self.state = "suggest_restaurant"
                     self.additional_requirements_done = True
                 else:
@@ -184,20 +185,20 @@ class State_diagram:
             
             elif self.dialog_act == "reqalts":
                 if len(self.available_restaurants) > 1:
-                    self.available_restaurants = self.available_restaurants.iloc[1:].reset_index(drop=True)
-                    suggest_restaurant(self.available_restaurants)
+                    self.available_restaurants = self.available_restaurants.drop(self.suggested_restaurant_index).reset_index(drop=True)
+
+                    self.suggested_restaurant_index = suggest_restaurant(self.available_restaurants)
                     self.state = "suggest_restaurant"
                 else:
                     print(self.system_utterances[8])
-                    self.state = "ask_preferences"
-                    self.is_state = False    
+                    self.ask_preferences(user_input)
             else:
                 print(self.system_utterances[9])
                 self.state = "suggest_restaurant"
                 
         elif self.state == "give_information":
             if self.dialog_act == "request":
-                restaurant_info = self.available_restaurants.iloc[0]
+                restaurant_info = self.available_restaurants.iloc[self.suggested_restaurant_index]
                 
                 if "phone" in user_input:
                     print(f"System: The phone number for this restaurant is {restaurant_info['phone']}")
