@@ -27,6 +27,13 @@ def main():
         if allow_dialog_restart in ['y', 'n']:
             break
 
+    # Ask the user if the dialog should be formal or informal
+    while True:
+        dialog_style = input("Do you want the dialog to be formal or informal? (You can switch this during the dialog) (formal/informal): ").lower()
+        if dialog_style in ['formal', 'informal']:
+            formal = (dialog_style == 'formal')
+            break
+
     # Load the appropriate model based on user choice
     if model_choice == '1':
         with open(r'part_one/trained_models/km_model.pkl', 'rb') as f:
@@ -48,7 +55,7 @@ def main():
     
     # Initialize and run the state diagram
     state_diagram = State_diagram()
-    state_diagram.run(model, vectorized, vectorize, levenshtein_distance_choice, allow_dialog_restart)
+    state_diagram.run(model, vectorized, vectorize, levenshtein_distance_choice, allow_dialog_restart, formal)
 
 if __name__ == "__main__":
     main()
