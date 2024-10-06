@@ -146,7 +146,6 @@ class State_diagram:
                 self.state = "suggest_restaurant"
             else:
                 valid_restaurants = apply_inference_rules(self.available_restaurants, user_input)
-                print(valid_restaurants.head())
 
                 if not valid_restaurants.empty:
                     self.available_restaurants = valid_restaurants

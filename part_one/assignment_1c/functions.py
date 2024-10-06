@@ -18,15 +18,17 @@ def Levenshtein_matching(word, options, threshold=3):
     return None # No match with word from db
 
 
-def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerange, threshold=3):
+import re
+
+def extract_preferences(user_utterance_input, db_areas, db_cuisine, db_pricerange, threshold=3):
     """
-    Functions to look for keywords that represents a type of cuisine, a location or a
+    Functions to look for keywords that represent a type of cuisine, a location, or a
     price range. Outputs a dictionary with the extracted information.
     """
 
     # Clean up
-    user_utterence_input = re.sub(r'[^\w\s]', '', user_utterence_input)
-    words = user_utterence_input.split()
+    user_utterance_input = re.sub(r'[^\w\s]', '', user_utterance_input)
+    words = user_utterance_input.split()
 
     # Glue doesntmatter & dontcare together to be recognized for 'dontcare' label
     final_words = []
@@ -40,10 +42,10 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
             continue
         
         # Loop through sentence and make an adjusted copy
-        if word == "dont" and words[i+1] == "care" and i+1<len(words):
+        if word == "dont" and i+1 < len(words) and words[i+1] == "care":
             final_words.append("dontcare")
             skip_next_word = 1
-        elif word == "doesnt" and words[i+1] == "matter" and i+1<len(words):
+        elif word == "doesnt" and i+1 < len(words) and words[i+1] == "matter":
             final_words.append("doesntmatter")
             skip_next_word = 1
         else:
@@ -51,7 +53,7 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
 
     words = final_words
 
-    # Remove stop words from utterence
+    # Remove stop words from utterance
     stopwords = {"i", "am", "looking", "for", "a", "an", "the", "in", "to", "of", "is",
                  "and", "on", "that", "please", "with", "find", "it"}
     words = [word.lower() for word in words if word.lower() not in stopwords]
@@ -122,6 +124,10 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
             elif i-1 > 0 and (words[i-1].endswith("ish") or words[i-1].endswith("an")):
                 preferences_dict["food type"] = words[i-1]
 
+    # If all preferences are 'dontcare', set them to 'dontcare'
+    if all(value == 'dontcare' for value in preferences_dict.values()):
+        preferences_dict = {key: 'dontcare' for key in preferences_dict}
+
     return preferences_dict
 
 
@@ -131,13 +137,13 @@ def lookup(restaurant_df, preferences_dict):
     """
 
     # Apply filters based on preferences
-    if preferences_dict["pricerange"] is not None:
+    if preferences_dict["pricerange"] is not None and preferences_dict["pricerange"].lower() != "dontcare":
         restaurant_df = restaurant_df[restaurant_df["pricerange"].str.lower() == preferences_dict["pricerange"].lower()]
     
-    if preferences_dict["area"] is not None:
+    if preferences_dict["area"] is not None and preferences_dict["area"].lower() != "dontcare":
         restaurant_df = restaurant_df[restaurant_df["area"].str.lower() == preferences_dict["area"].lower()]
     
-    if preferences_dict["food type"] is not None:
+    if preferences_dict["food type"] is not None and preferences_dict["food type"].lower() != "dontcare":
         restaurant_df = restaurant_df[restaurant_df["food"].str.lower() == preferences_dict["food type"].lower()]
 
     return restaurant_df
