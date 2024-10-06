@@ -67,7 +67,7 @@ class State_diagram:
         self.system_utterances = self.formal_dialogue
     
     def ask_preferences(self, user_input):
-        new_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+        new_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange, levenshtein_distance)
 
         # Update the existing preferences_dict
         for key, value in new_preferences.items():
@@ -145,7 +145,10 @@ class State_diagram:
                 suggest_restaurant(self.available_restaurants)
                 self.state = "suggest_restaurant"
             else:
-                valid_restaurants = apply_inference_rules(self.available_restaurants, user_input)
+                valid_restaurants, contradiction = apply_inference_rules(self.available_restaurants, user_input)
+
+                if contradiction:
+                    print('System: Hey man, sorry, was contradiction. We removed contradictions. ')
 
                 if not valid_restaurants.empty:
                     self.available_restaurants = valid_restaurants
