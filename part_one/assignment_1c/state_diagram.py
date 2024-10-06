@@ -170,7 +170,7 @@ class State_diagram:
 
         elif self.state == "suggest_restaurant":
             if self.dialog_act == "request":
-                self.state = "give_info"
+                self.state = "give_information"
                 self.is_state = False
             
             elif self.dialog_act == "inform":
@@ -189,7 +189,7 @@ class State_diagram:
                 print(self.system_utterances[9])
                 self.state = "suggest_restaurant"
                 
-        elif self.state == "give_info":
+        elif self.state == "give_information":
             if self.dialog_act == "request":
                 restaurant_info = self.available_restaurants.iloc[0]
                 
@@ -206,7 +206,7 @@ class State_diagram:
 
             elif self.dialog_act == "inform":
                 print(self.system_utterances[7])
-                self.state = "give_info"
+                self.state = "give_information"
             else:
                 print(self.system_utterances[9])
                 self.state = "suggest_restaurant"
