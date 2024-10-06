@@ -46,6 +46,7 @@ def suggest_restaurant(available_restaurants):
     # Print the suggestion
     print(f"System: I suggest {restaurant_name}. It serves {restaurant_food} food in the {restaurant_area} area and falls within the {restaurant_pricerange} price range.")
 
+
 def add_reasoning_data(df):
     """
     Add reasoning data to the DataFrame.
@@ -58,7 +59,7 @@ def add_reasoning_data(df):
     crowdedness_list = []
     length_of_stay_list = []
     
-    for i in range(len(df)):
+    for _ in range(len(df)):
         food_quality_list.append(random.choice(food_quality_options))
         crowdedness_list.append(random.choice(crowdedness_options))
         length_of_stay_list.append(random.choice(length_of_stay_options))

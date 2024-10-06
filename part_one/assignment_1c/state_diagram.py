@@ -44,6 +44,7 @@ class State_diagram:
             "Type 'children' if you want the restaurant to be suitable for children,\n"
             "Type 'romantic' if you want a romantic restaurant.\n"
             "Type 'no additional requirements' if you have no additional requirements."
+            "System: I am sorry, there are no restaurants with those preferences:"
         ]
         
         self.informal_dialogue = [
@@ -64,6 +65,7 @@ class State_diagram:
             "Type 'children' if you want the restaurant to be suitable for children,\n"
             "Type 'romantic' if you want a romantic restaurant.\n"
             "Type 'no additional requirements' if you have no additional requirements."
+            "System: Sorry, but there are no restaurants with those preferences:"
         ]
         
         self.system_utterances = self.formal_dialogue
@@ -81,8 +83,8 @@ class State_diagram:
 
         self.available_restaurants = lookup(self.restaurant_df, self.preferences_dict)
         if self.available_restaurants.empty:
-            print(f"System: I am sorry, there are no restaurants with those preferences: "
-                  f"Area: {self.preferences_dict['area']}, "
+            print(self.system_utterances[12])
+            print(f"Area: {self.preferences_dict['area']}, "
                   f"Food Type: {self.preferences_dict['food type']}, "
                   f"Price Range: {self.preferences_dict['pricerange']}. "
                   "Please provide me with different preferences.")
