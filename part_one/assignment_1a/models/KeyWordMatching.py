@@ -9,7 +9,7 @@ class KeywordMatchingModel():
         for i in range(len(input)):
             utterance = ' '.join(input[i])  # Join the words in each utterance into a string
             
-            if "thank" in utterance:
+            if "thank" in utterance or "thanks" in utterance:
                 classification.append("thankyou")
             elif "bye" in utterance:
                 classification.append("bye")
