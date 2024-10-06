@@ -43,7 +43,7 @@ class State_diagram:
             "Type 'assigned seats' if you want the restaurant to have assigned seating,\n"
             "Type 'children' if you want the restaurant to be suitable for children,\n"
             "Type 'romantic' if you want a romantic restaurant.\n"
-            "Type 'no additional requirements' if you have no additional requirements."
+            "Type 'no additional requirements' if you have no additional requirements.",
             "System: I am sorry, there are no restaurants with those preferences:"
         ]
         
@@ -64,7 +64,7 @@ class State_diagram:
             "Type 'assigned seats' if you want the restaurant to have assigned seating,\n"
             "Type 'children' if you want the restaurant to be suitable for children,\n"
             "Type 'romantic' if you want a romantic restaurant.\n"
-            "Type 'no additional requirements' if you have no additional requirements."
+            "Type 'no additional requirements' if you have no additional requirements.",
             "System: Sorry, but there are no restaurants with those preferences:"
         ]
         
@@ -72,6 +72,9 @@ class State_diagram:
     
 
     def ask_preferences(self, user_input):
+        """
+        Function to ask the user for preferences and update the state accordingly
+        """
         new_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
 
         # Update the existing preferences_dict
@@ -109,7 +112,10 @@ class State_diagram:
         self.is_state = True
 
 
-    def state_transition_function(self, user_input=None, levenshtein_distance_threshold=3):
+    def state_transition_function(self, user_input=None):
+        """
+        Function to transition between states based on the user input
+        """
         if self.dialog_act == "thankyou" or self.dialog_act == "bye":
             print(self.system_utterances[0])
             self.state = "endstate"
@@ -214,7 +220,10 @@ class State_diagram:
             self.is_state = True
 
 
-    def run(self, model, vectorizer, vectorized, levenshtein_distance_threshold=3, allow_dialog_restart='y', formal=True):        
+    def run(self, model, vectorizer, vectorized, levenshtein_distance_threshold=3, allow_dialog_restart='y', formal=True):    
+        """
+        Function to run the state diagram.
+        """    
         self.lievenshtein_distance_threshold = levenshtein_distance_threshold
 
         if allow_dialog_restart == 'y':

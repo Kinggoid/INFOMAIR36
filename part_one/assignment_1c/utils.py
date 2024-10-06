@@ -2,6 +2,9 @@ import random
 from Levenshtein import distance as levenshtein_distance
 
 def Levenshtein_matching(word, options, threshold=3):
+    """
+    Return the closest match from the options based on the Levenshtein distance.
+    """
     closest_matches = []
     for option in options:
         dist = levenshtein_distance(word, option)
@@ -35,6 +38,9 @@ def lookup(restaurant_df, preferences_dict):
 
 
 def suggest_restaurant(available_restaurants):
+    """
+    Suggest a restaurant based on the available restaurants
+    """
     suggested_restaurant = available_restaurants.iloc[0]
     
     # Extract details of the suggested restaurant
