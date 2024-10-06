@@ -34,8 +34,7 @@ class State_diagram:
             "System: What more information would you like to know?",
             "System: I'm sorry, there are no more restaurants to suggest.",
             "System: I'm sorry, I didn't understand your request.",
-            "System: Hello, welcome to the Cambridge restaurant system? You can ask for restaurants by area, price range or food type. How may I help you?",
-            "System: Please enter your preferences from the following options:\n"
+            "System: Hello, welcome to the Cambridge restaurant system? You can ask for restaurants by area, price range or food type. How may I help you?",            "System: Please enter your preferences from the following options. Note that selecting preferences that contradict each other (e.g., a restaurant cannot be both romantic and not romantic) may result in no suitable recommendations being found.\n"
             "Type 'touristic' if you want a touristic restaurant,\n"
             "Type 'assigned seats' if you want the restaurant to have assigned seating,\n"
             "Type 'children' if you want the restaurant to be suitable for children,\n"
@@ -56,7 +55,7 @@ class State_diagram:
             "System: Sorry, friend, I've got no other places I can suggest...",
             "System: Sorry, but, like, I don't get what you want me to tell you...",
             "System: Hey there! Welcome to the Cambridge restaurant system! You can ask for restaurants by area, price range or food type. How can I help you out?",
-            "System: Please enter your preferences from the following options:\n"
+            "System: Enter your preferences from the following options. But restaurants with selected preferences that contradict each other will not be recommended (e.g., a restaurant can't be both romantic and not romantic) :\n"
             "Type 'touristic' if you want a touristic restaurant,\n"
             "Type 'assigned seats' if you want the restaurant to have assigned seating,\n"
             "Type 'children' if you want the restaurant to be suitable for children,\n"
@@ -145,9 +144,11 @@ class State_diagram:
                 suggest_restaurant(self.available_restaurants)
                 self.state = "suggest_restaurant"
             else:
-                valid_restaurants = apply_inference_rules(self.available_restaurants, user_input)
+                valid_restaurants, requirements = apply_inference_rules(self.available_restaurants, user_input)
 
                 if not valid_restaurants.empty:
+                    requirements_str = ', '.join(requirements)
+                    print(f'System: The restaurants have been filtered by the requirements: {requirements_str}')
                     self.available_restaurants = valid_restaurants
                     print(self.system_utterances[3])
                     suggest_restaurant(self.available_restaurants)

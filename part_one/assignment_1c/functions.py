@@ -195,6 +195,10 @@ def apply_inference_rules(restaurant_df, user_input):
     # Define the additional requirements
     additional_req_signal = {"touristic", "assigned seats", "children", "romantic"}
 
+    # Check for "assigned seats" as a single requirement
+    if "assigned" in words and "seats" in words:
+        words.add("assigned seats")
+
     # Filter the matching requirements
     additional_requirements = [match for match in additional_req_signal if match in words]
 
@@ -202,7 +206,6 @@ def apply_inference_rules(restaurant_df, user_input):
     valid_restaurants_df = pd.DataFrame(columns=restaurant_df.columns)
 
     for _, row in restaurant_df.iterrows():
-        print(row)
         # Extract necessary information from the row
         crowdedness = row.get("crowdedness", "").lower()
         food = row.get("food", "").lower()
@@ -230,7 +233,7 @@ def apply_inference_rules(restaurant_df, user_input):
                 continue  
 
         if "romantic" in additional_requirements:
-            if crowdedness != "busy" and stay_duration == "long":  # It is a romantic restaurant	
+            if crowdedness != "busy" and stay_duration == "long stay":  # It is a romantic restaurant	
                 pass  
             else:
                 continue
@@ -241,4 +244,4 @@ def apply_inference_rules(restaurant_df, user_input):
     # Reset the index of the new DataFrame
     valid_restaurants_df.reset_index(drop=True, inplace=True)
 
-    return valid_restaurants_df
+    return valid_restaurants_df, additional_requirements
