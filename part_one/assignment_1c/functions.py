@@ -18,15 +18,17 @@ def Levenshtein_matching(word, options, threshold=3):
     return None # No match with word from db
 
 
-def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerange, threshold=3):
+import re
+
+def extract_preferences(user_utterance_input, db_areas, db_cuisine, db_pricerange, threshold=3):
     """
-    Functions to look for keywords that represents a type of cuisine, a location or a
+    Functions to look for keywords that represent a type of cuisine, a location, or a
     price range. Outputs a dictionary with the extracted information.
     """
 
     # Clean up
-    user_utterence_input = re.sub(r'[^\w\s]', '', user_utterence_input)
-    words = user_utterence_input.split()
+    user_utterance_input = re.sub(r'[^\w\s]', '', user_utterance_input)
+    words = user_utterance_input.split()
 
     # Glue doesntmatter & dontcare together to be recognized for 'dontcare' label
     final_words = []
@@ -40,10 +42,10 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
             continue
         
         # Loop through sentence and make an adjusted copy
-        if word == "dont" and words[i+1] == "care" and i+1<len(words):
+        if word == "dont" and i+1 < len(words) and words[i+1] == "care":
             final_words.append("dontcare")
             skip_next_word = 1
-        elif word == "doesnt" and words[i+1] == "matter" and i+1<len(words):
+        elif word == "doesnt" and i+1 < len(words) and words[i+1] == "matter":
             final_words.append("doesntmatter")
             skip_next_word = 1
         else:
@@ -51,7 +53,7 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
 
     words = final_words
 
-    # Remove stop words from utterence
+    # Remove stop words from utterance
     stopwords = {"i", "am", "looking", "for", "a", "an", "the", "in", "to", "of", "is",
                  "and", "on", "that", "please", "with", "find", "it"}
     words = [word.lower() for word in words if word.lower() not in stopwords]
@@ -122,6 +124,10 @@ def extract_preferences(user_utterence_input, db_areas, db_cuisine, db_pricerang
             elif i-1 > 0 and (words[i-1].endswith("ish") or words[i-1].endswith("an")):
                 preferences_dict["food type"] = words[i-1]
 
+    # If all preferences are 'dontcare', set them to 'dontcare'
+    if all(value == 'dontcare' for value in preferences_dict.values()):
+        preferences_dict = {key: 'dontcare' for key in preferences_dict}
+
     return preferences_dict
 
 
@@ -131,52 +137,16 @@ def lookup(restaurant_df, preferences_dict):
     """
 
     # Apply filters based on preferences
-    if preferences_dict["pricerange"] is not None:
+    if preferences_dict["pricerange"] is not None and preferences_dict["pricerange"].lower() != "dontcare":
         restaurant_df = restaurant_df[restaurant_df["pricerange"].str.lower() == preferences_dict["pricerange"].lower()]
     
-    if preferences_dict["area"] is not None:
+    if preferences_dict["area"] is not None and preferences_dict["area"].lower() != "dontcare":
         restaurant_df = restaurant_df[restaurant_df["area"].str.lower() == preferences_dict["area"].lower()]
     
-    if preferences_dict["food type"] is not None:
+    if preferences_dict["food type"] is not None and preferences_dict["food type"].lower() != "dontcare":
         restaurant_df = restaurant_df[restaurant_df["food"].str.lower() == preferences_dict["food type"].lower()]
 
     return restaurant_df
-
-
-def ask_preferences(user_input, preferences_dict, unique_areas, unique_foodtype, unique_pricerange, restaurant_df):
-    new_preferences = extract_preferences(user_input, unique_areas, unique_foodtype, unique_pricerange)
-
-    # Update the existing preferences_dict
-    for key, value in new_preferences.items():
-        if value is not None:
-            preferences_dict[key] = value
-
-    missing_preferences = [pref for pref, value in preferences_dict.items() if value is None]
-
-    available_restaurants = lookup(restaurant_df, preferences_dict)
-    if available_restaurants.empty:
-        print(f"System: I am sorry, there are no restaurants with those preferences: "
-              f"Area: {preferences_dict['area']}, "
-              f"Food Type: {preferences_dict['food type']}, "
-              f"Price Range: {preferences_dict['pricerange']}. "
-              "Please provide me with different preferences.")
-        return "preference_doesnt_exist", available_restaurants
-    elif not missing_preferences:
-        # Suggest the first restaurant from the filtered DataFrame
-        suggest_restaurant(available_restaurants)
-        return "suggest_restaurant", available_restaurants
-    elif "area" in missing_preferences:
-        print("System: In what area would you like to eat?")
-        return "ask_area", available_restaurants
-    elif "food type" in missing_preferences:
-        print("System: What type of food are you looking for?")	
-        return "ask_food_type", available_restaurants
-    elif "pricerange" in missing_preferences:
-        print("System: What type of price range are you looking for?")
-        return "ask_price_range", available_restaurants
-    else:
-        print('For testing. If you read this, something went wrong')
-        return None, available_restaurants
 
 
 def suggest_restaurant(available_restaurants):
@@ -191,4 +161,84 @@ def suggest_restaurant(available_restaurants):
     # Print the suggestion
     print(f"System: I suggest {restaurant_name}. It serves {restaurant_food} food in the {restaurant_area} area and falls within the {restaurant_pricerange} price range.")
 
+def add_reasoning_data(df):
+    """
+    Add reasoning data to the DataFrame.
+    """
+    food_quality_options = ["good", "not good"]
+    crowdedness_options = ["busy", "not busy"]
+    length_of_stay_options = ["long stay", "short stay"]
+    
+    food_quality_list = []
+    crowdedness_list = []
+    length_of_stay_list = []
+    
+    for i in range(len(df)):
+        food_quality_list.append(random.choice(food_quality_options))
+        crowdedness_list.append(random.choice(crowdedness_options))
+        length_of_stay_list.append(random.choice(length_of_stay_options))
+    
+    df["food_quality"] = food_quality_list
+    df['crowdedness'] = crowdedness_list
+    df['length_of_stay'] = length_of_stay_list
 
+    return df
+
+
+def apply_inference_rules(restaurant_df, user_input):
+    """
+    output: restaurant_df with all restaurants that fit the additional_requirements
+    """
+    # Ensure user input is a string, convert to lowercase, remove non-alphanumeric characters, and split into words
+    words = set(re.sub(r'[^\w\s]', '', str(user_input).lower()).split())
+
+    # Define the additional requirements
+    additional_req_signal = {"touristic", "assigned seats", "children", "romantic"}
+
+    # Filter the matching requirements
+    additional_requirements = [match for match in additional_req_signal if match in words]
+
+    # Initialize an empty DataFrame to store the valid rows
+    valid_restaurants_df = pd.DataFrame(columns=restaurant_df.columns)
+
+    for _, row in restaurant_df.iterrows():
+        print(row)
+        # Extract necessary information from the row
+        crowdedness = row.get("crowdedness", "").lower()
+        food = row.get("food", "").lower()
+        price = row.get("price", "").lower()
+        stay_duration = row.get("length_of_stay", "").lower()
+        food_quality = row.get("food_quality", "").lower()
+
+        # Apply inference rules
+        if "touristic" in additional_requirements:
+            if food != "romanian" and price == "cheap" and food_quality == "good":  # This restaurant is touristic
+                pass  
+            else:
+                continue 
+
+        if "assigned seats" in additional_requirements:
+            if crowdedness == "busy":  # This restaurant has assigned seats
+                pass  
+            else:
+                continue 
+
+        if "children" in additional_requirements:
+            if stay_duration != "long":  # This restaurant is suitable for children
+                pass  
+            else:
+                continue  
+
+        if "romantic" in additional_requirements:
+            if crowdedness != "busy" and stay_duration == "long":  # It is a romantic restaurant	
+                pass  
+            else:
+                continue
+
+        # If the row meets all requirements, add it to the new DataFrame
+        valid_restaurants_df = pd.concat([valid_restaurants_df, pd.DataFrame([row])], ignore_index=True)
+
+    # Reset the index of the new DataFrame
+    valid_restaurants_df.reset_index(drop=True, inplace=True)
+
+    return valid_restaurants_df
