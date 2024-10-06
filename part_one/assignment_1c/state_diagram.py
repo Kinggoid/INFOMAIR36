@@ -87,9 +87,13 @@ class State_diagram:
                   f"Price Range: {self.preferences_dict['pricerange']}. "
                   "Please provide me with different preferences.")
             self.state = "preference_doesnt_exist"
-        elif not missing_preferences and not self.additional_requirements_done:
-            print(self.system_utterances[11])
-            self.state = "additional_requirements"
+        elif not missing_preferences:
+            if not self.additional_requirements_done:
+                print(self.system_utterances[11])
+                self.state = "additional_requirements"
+            else:
+                suggest_restaurant(self.available_restaurants)
+                self.state = "suggest_restaurant"
         elif "area" in missing_preferences:
             print(self.system_utterances[3])
             self.state = "ask_area"
@@ -147,6 +151,7 @@ class State_diagram:
             if "no additional requirements" in user_input:
                 suggest_restaurant(self.available_restaurants)
                 self.state = "suggest_restaurant"
+                self.additional_requirements_done = True
             else:
                 valid_restaurants, requirements = apply_inference_rules(self.available_restaurants, user_input)
 
@@ -173,6 +178,7 @@ class State_diagram:
                 if len(self.available_restaurants) > 1:
                     self.available_restaurants = self.available_restaurants.iloc[1:].reset_index(drop=True)
                     suggest_restaurant(self.available_restaurants)
+                    self.state = "suggest_restaurant"
                 else:
                     print(self.system_utterances[8])
                     self.state = "ask_preferences"
@@ -198,6 +204,7 @@ class State_diagram:
 
             elif self.dialog_act == "inform":
                 print(self.system_utterances[7])
+                self.state = "give_info"
             else:
                 print(self.system_utterances[9])
                 self.state = "suggest_restaurant"
