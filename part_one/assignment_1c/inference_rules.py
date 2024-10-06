@@ -5,7 +5,6 @@ def apply_inference_rules(restaurant_df, user_input):
     """
     output: restaurant_df with all restaurants that fit the additional_requirements
     """
-    print(restaurant_df)
     # Ensure user input is a string, convert to lowercase, remove non-alphanumeric characters, and split into words
     words = set(re.sub(r'[^\w\s]', '', str(user_input).lower()).split())
 
@@ -60,5 +59,4 @@ def apply_inference_rules(restaurant_df, user_input):
 
     # Reset the index of the new DataFrame
     valid_restaurants_df.reset_index(drop=True, inplace=True)
-    print(valid_restaurants_df)
     return valid_restaurants_df, additional_requirements

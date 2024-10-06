@@ -108,5 +108,4 @@ def extract_preferences(user_utterance_input, db_areas, db_cuisine, db_pricerang
     # If all preferences are 'dontcare', set them to 'dontcare'
     if all(value == 'dontcare' for value in preferences_dict.values()):
         preferences_dict = {key: 'dontcare' for key in preferences_dict}
-    print(preferences_dict)
     return preferences_dict

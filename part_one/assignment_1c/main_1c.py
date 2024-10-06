@@ -1,6 +1,6 @@
 import pickle
 from state_diagram import State_diagram
-from functions import *
+from utils import *
 
 def main():
     # Ask the user for the classification method
