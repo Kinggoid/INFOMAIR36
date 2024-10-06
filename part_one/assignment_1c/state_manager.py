@@ -73,10 +73,7 @@ class State_diagram:
     
 
     def ask_preferences(self, user_input):
-        """
-        Function to ask the user for preferences and update the state accordingly
-        """
-        new_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange)
+        new_preferences = extract_preferences(user_input, self.unique_areas, self.unique_foodtype, self.unique_pricerange, self.levenshtein_distance)
 
         # Update the existing preferences_dict
         for key, value in new_preferences.items():

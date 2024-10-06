@@ -95,18 +95,17 @@ def extract_preferences(user_utterance_input, db_areas, db_cuisine, db_pricerang
                     continue
 
         # Final check: possible unrecognized foodtype preference missed?
-        elif word == 'food' and preferences_dict["food type"] == None:
+        elif (word == 'food' or word =='restaurant') and preferences_dict["food type"] == None:
             
             # Option 1: "serving"/"for" + preference + "food"
-            if i - 2 > 0 and (words[i-2].startswith("serv") or words[i-2] == "for"):
+            if i - 2 >= 0 and (words[i-2].startswith("serv") or words[i-2] == "for"):
                 preferences_dict["food type"] = words[i-1]
 
             # Option 2: nationality ending with -ish or -an + "food"
-            elif i-1 > 0 and (words[i-1].endswith("ish") or words[i-1].endswith("an")):
+            elif i-1 >= 0 and (words[i-1].endswith("ish") or words[i-1].endswith("an")):
                 preferences_dict["food type"] = words[i-1]
 
     # If all preferences are 'dontcare', set them to 'dontcare'
     if all(value == 'dontcare' for value in preferences_dict.values()):
         preferences_dict = {key: 'dontcare' for key in preferences_dict}
-
     return preferences_dict
