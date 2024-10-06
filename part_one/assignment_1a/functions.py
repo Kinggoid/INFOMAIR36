@@ -9,8 +9,7 @@ def datacleaning(file_path):
     df = pd.read_csv(file_path, delimiter='\t')
     df.columns = ['dialog_act']
 
-    # Cleaning dataset
-    # Cleaning dataset
+    #Cleaning dataset
     df_clean = df.drop_duplicates()
 
     # Adding structure to database, separating dialog_acts and utterances
@@ -23,15 +22,22 @@ def datacleaning(file_path):
     df_clean['dialog_act'] = df_clean['dialog_act'].str.split().str[0]
 
     # Converting to lists
+    utterance = df['utterance'].tolist()  
+    label = df['dialog_act'].tolist()
+
     utterance_clean = df_clean['utterance'].tolist()  
-    label_clean = df_clean['dialog_act'].tolist()  
+    label_clean = df_clean['dialog_act'].tolist()
 
     # Splitting data into training and test data
+    utterance_train, utterance_test, label_train, label_test = train_test_split(
+        utterance, label, test_size=0.15, random_state=42
+    )
+
     utterance_clean_train, utterance_clean_test, label_clean_train, label_clean_test = train_test_split(
         utterance_clean, label_clean, test_size=0.15, random_state=42
     )
 
-    return utterance_clean_train, utterance_clean_test, label_clean_train, label_clean_test
+    return utterance_clean_train, utterance_clean_test, label_clean_train, label_clean_test, utterance_train, utterance_test, label_train, label_test
 
 
 def vectorize(X_train, X_test):
