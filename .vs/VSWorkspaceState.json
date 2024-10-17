@@ -1,7 +1,11 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\part_one",
+    "\\part_one\\assignment_1a\\models",
+    "\\part_one\\assignment_1c",
+    "\\part_one\\data"
   ],
-  "SelectedNode": "\\C:\\Users\\Akiyama Toushiro\\Source\\Repos\\INFOMAIR36pc",
+  "SelectedNode": "\\part_one\\assignment_1c\\main_1c.py",
   "PreviewInSolutionExplorer": false
 }
