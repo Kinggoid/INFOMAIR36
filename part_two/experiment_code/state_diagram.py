@@ -2,6 +2,8 @@ from utils import lookup, suggest_restaurant, add_reasoning_data
 from preference_extraction import extract_preferences
 from inference_rules import apply_inference_rules
 import pandas as pd
+import time
+
 
 class State_diagram:
     def __init__(self):
@@ -20,6 +22,9 @@ class State_diagram:
         self.unique_areas = set(self.restaurant_df['area'].dropna().str.lower())
         self.unique_foodtype = set(self.restaurant_df['food'].dropna().str.lower())
 
+        print("Unique areas: ", self.unique_areas)
+        print("Unique price ranges: ", self.unique_pricerange)
+              
         self.allow_dialog_restart = 'n'
         self.available_restaurants = None
         self.dialog_act = None
@@ -31,9 +36,9 @@ class State_diagram:
             "System: You are welcome. Have a nice day!", 
             "System: I am sorry, I did not understand that. Please provide me with more information.",
             "System: I am sorry, there are no restaurants with those preferences. Please provide me with different preferences.",
-            "System: In what area would you like to eat?",
+            "System: In what area would you like to eat? You can choose from: 'centre', 'north', 'south', 'east', 'west'.",
             "System: What type of food are you looking for?",
-            "System: What type of price range are you looking for?",
+            "System: What type of price range are you looking for? You can choose from: 'cheap', 'moderate', 'expensive'.",
             "System: I am sorry, I did not understand that. Please provide me with more information about your preferences.",
             "System: What more information would you like to know?",
             "System: I'm sorry, there are no more restaurants to suggest.",
@@ -52,9 +57,9 @@ class State_diagram:
             "System: Alright, take it easy. See you next time!",  
             "System: Uh... I didn't quite catch that... Mind telling me again?",
             "System: Hey, it doesn't look like there's any places that fit what you want. Maybe switch up your demands a bit and check again...",
-            "System: Where in town do ya wanna eat?",
+            "System: Where in town do ya wanna eat? You can choose from: 'centre', 'north', 'south', 'east', 'west'.",
             "System: What do you feel like eating?",
-            "System: Alright, so how much do you wanna pay for this?",
+            "System: Alright, so how much do you wanna pay for this? You can choose from: 'cheap', 'moderate', 'expensive'.",
             "System: Uhm, this is a little embarrassing... but can you, like, make that clearer?",
             "System: Alright, alright, what more do you wanna know?",
             "System: Sorry, friend, I've got no other places I can suggest...",
@@ -237,6 +242,10 @@ class State_diagram:
 
         print(self.system_utterances[10])
 
+        # Initialize runtime and state turn counter
+        start_time = time.time()
+        state_turns = 0
+
         while self.state != "endstate":
             if self.is_state:
                 user_input = input("You: ").lower()
@@ -250,5 +259,16 @@ class State_diagram:
                     self.dialog_act = model.predict([[user_input]])[0]
                 self.state_transition_function(user_input)
 
+                # Increment state turn counter
+                state_turns += 1
+
             else:
                 self.state_transition_function(user_input=user_input)
+
+        # Calculate runtime
+        end_time = time.time()
+        runtime = end_time - start_time
+
+        # Print findings
+        print(f"Runtime: {runtime:.2f} seconds")
+        print(f"Number of state turns: {state_turns}")
