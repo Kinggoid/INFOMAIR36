@@ -21,9 +21,6 @@ class State_diagram:
         self.unique_pricerange = set(self.restaurant_df['pricerange'].dropna().str.lower())
         self.unique_areas = set(self.restaurant_df['area'].dropna().str.lower())
         self.unique_foodtype = set(self.restaurant_df['food'].dropna().str.lower())
-
-        print("Unique areas: ", self.unique_areas)
-        print("Unique price ranges: ", self.unique_pricerange)
               
         self.allow_dialog_restart = 'n'
         self.available_restaurants = None
