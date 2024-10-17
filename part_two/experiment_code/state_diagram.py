@@ -33,9 +33,9 @@ class State_diagram:
             "System: You are welcome. Have a nice day!", 
             "System: I am sorry, I did not understand that. Please provide me with more information.",
             "System: I am sorry, there are no restaurants with those preferences. Please provide me with different preferences.",
-            "System: In what area would you like to eat? You can choose from: 'centre', 'north', 'south', 'east', 'west'.",
+            "System: In what area would you like to eat?",
             "System: What type of food are you looking for?",
-            "System: What type of price range are you looking for? You can choose from: 'cheap', 'moderate', 'expensive'.",
+            "System: What type of price range are you looking for?",
             "System: I am sorry, I did not understand that. Please provide me with more information about your preferences.",
             "System: What more information would you like to know?",
             "System: I'm sorry, there are no more restaurants to suggest.",
@@ -54,9 +54,9 @@ class State_diagram:
             "System: Alright, take it easy. See you next time!",  
             "System: Uh... I didn't quite catch that... Mind telling me again?",
             "System: Hey, it doesn't look like there's any places that fit what you want. Maybe switch up your demands a bit and check again...",
-            "System: Where in town do ya wanna eat? You can choose from: 'centre', 'north', 'south', 'east', 'west'.",
+            "System: Where in town do ya wanna eat?",
             "System: What do you feel like eating?",
-            "System: Alright, so how much do you wanna pay for this? You can choose from: 'cheap', 'moderate', 'expensive'.",
+            "System: Alright, so how much do you wanna pay for this?",
             "System: Uhm, this is a little embarrassing... but can you, like, make that clearer?",
             "System: Alright, alright, what more do you wanna know?",
             "System: Sorry, friend, I've got no other places I can suggest...",
@@ -236,6 +236,9 @@ class State_diagram:
 
         if not formal:
             self.system_utterances = self.informal_dialogue
+
+        print("Available areas to choose from: 'centre', 'north', 'south', 'east', 'west'.")
+        print("Available prices to choose from: 'cheap', 'moderate', 'expensive'.\n")
 
         print(self.system_utterances[10])
 
