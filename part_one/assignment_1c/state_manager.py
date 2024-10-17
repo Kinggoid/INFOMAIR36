@@ -12,7 +12,6 @@ class State_diagram:
                                  "pricerange": None}
                         
         self.lievenshtein_distance_threshold = 3
-        self.allow_dialog_restart = 'y'
 
         self.restaurant_df = pd.read_csv('part_one\\data\\restaurant_info.csv')
         self.restaurant_df = add_reasoning_data(self.restaurant_df)
@@ -21,6 +20,7 @@ class State_diagram:
         self.unique_areas = set(self.restaurant_df['area'].dropna().str.lower())
         self.unique_foodtype = set(self.restaurant_df['food'].dropna().str.lower())
 
+        self.allow_dialog_restart = 'n'
         self.available_restaurants = None
         self.dialog_act = None
 
@@ -224,7 +224,9 @@ class State_diagram:
         """    
         self.lievenshtein_distance_threshold = levenshtein_distance_threshold
 
-        if allow_dialog_restart == 'y':
+        self.allow_dialog_restart = allow_dialog_restart
+
+        if self.allow_dialog_restart == 'y':
             self.allow_dialog_restart = 'y'
 
         if not formal:
