@@ -131,7 +131,7 @@ class State_diagram:
             print(self.system_utterances[10])
             
         elif self.state == "welcome":
-            if self.dialog_act == "inform" or self.dialog_act == "null":
+            if self.dialog_act == "inform" or self.dialog_act == "null" or self.dialog_act == "hello":
                 self.ask_preferences(user_input)
             else:
                 print(self.system_utterances[10])

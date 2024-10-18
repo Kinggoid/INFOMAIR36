@@ -11,10 +11,10 @@ def datacleaning(file_path):
 
     # Cleaning dataset
     # Cleaning dataset
-    df_clean = df.drop_duplicates()
+    # df_clean = df.drop_duplicates()
 
     # Adding structure to database, separating dialog_acts and utterances
-    df_clean = df_clean.copy()  # Create a deep copy to avoid SettingWithCopyWarning
+    df_clean = df.copy()  # Create a deep copy to avoid SettingWithCopyWarning
     # Adding structure to database, separating dialog_acts and utterances
     df['utterance'] = df['dialog_act'].str.split().str[1:]
     df['dialog_act'] = df['dialog_act'].str.split().str[0]
