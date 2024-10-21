@@ -1,6 +1,8 @@
 import pickle
 from state_diagram import State_diagram
 from utils import *
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def main():
     # Ask the user if the dialog should be formal or informal
