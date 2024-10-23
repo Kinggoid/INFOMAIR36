@@ -205,7 +205,7 @@ class State_diagram:
                 
                 if "phone" in user_input:
                     print(f"System: The phone number for this restaurant is {restaurant_info['phone']}")
-                elif "address" in user_input:
+                elif "address" in user_input or "adres" in user_input or "adress" in user_input or "location" in user_input:
                     print(f"System: The address for this restaurant is {restaurant_info['addr']}")
                     print(self.system_utterances[0])
                     self.state = "endstate"
@@ -242,7 +242,8 @@ class State_diagram:
             self.system_utterances = self.informal_dialogue
 
         print("Hi, thank you for agreeing to help us with our research. We are interested in understanding how people interact with chatbots.")
-        print("Your task is to find the address of a restaurant in Cambridge where you'd like to eat, using our chatbot. The conversation will end when the address is found.\n")
+        print("Your task is to find the address of a restaurant in Cambridge where you'd like to eat, using our chatbot. The conversation will end when the address is found.")
+        print("Please provide the information requested by the chatbot in any way you'd like. The system isn't perfect, but try and succeed in finding the address yourself.\n")
 
         print('Extra information:')
         print("Available areas to choose from: 'centre', 'north', 'south', 'east', 'west'.")
